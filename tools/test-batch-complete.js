@@ -42,7 +42,7 @@ function grabFn(src, name) {
 section('1) ★ 不能有固定时长的放弃定时器');
 {
   // 逻辑已挪到 enrichOneBatch（分批流水线），断言跟着挪
-  const fn = grabFn(BR, 'enrichOneBatch');
+  const fn = grabFn(BR, 'enrichOne');
   is('★ 没有 setTimeout 型「到点放弃」',
     !/setTimeout\([^)]*60000/.test(fn));
   is('★ 没有 resolve(null) 式的放弃分支',
@@ -51,8 +51,8 @@ section('1) ★ 不能有固定时长的放弃定时器');
     /timeout: 5 \* 60 \* 1000/.test(fn), (fn.match(/timeout: [^,}]+/) || [''])[0]);
   is('★ 真的 await 了补详情的回包',
     /await askInjected\('ensure-cards'/.test(fn));
-  is('★ 补完之后才调回调（先补完再下载这一批）',
-    fn.indexOf('await cb()') > fn.indexOf("await askInjected('ensure-cards'"));
+  is('★ 补完之后才调回调（先补完这一件再下载）',
+    fn.indexOf('await cb([id])') > fn.indexOf("await askInjected('ensure-cards'"));
 }
 
 section('2) ★ 补详情的耗时账：不能比超时短');
@@ -89,10 +89,10 @@ section('4) ★★ 补失败的要有第二轮重试');
 
 section('5) ★ 前端如实告知漏了几件');
 {
-  const fn = grabFn(BR, 'enrichOneBatch');
+  const fn = grabFn(BR, 'enrichOne');
   is('★ 读的是回包里的 stillFailed', fn.indexOf('res.stillFailed') > 0);
-  is('★ 会提示用户「有 N 个没补到」', /missed \+ ' 个商品/.test(fn));
-  is('★ 控制台留痕便于排查', /补齐用时/.test(fn));
+  is('★ 会提示这一件没补到', /两次都没取到完整详情/.test(fn));
+  is('★ 控制台留痕便于排查', /补齐一件用时/.test(fn));
   is('★ 不再静默继续（旧代码是「已用现有数据继续打包」就往下走）',
     fn.indexOf('已用现有数据继续打包') < 0);
 }

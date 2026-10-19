@@ -572,22 +572,25 @@
     return !hasRealSpec;
   }
 
-  /**
-   * 批量打包：**分批流水线**——补齐一批、下载一批、再补下一批。
+/**
+   * 批量处理：**逐件流水线** —— 补齐一件，立刻下载它，再处理下一件。
    *
-   * ⚠️ 为什么不能「全部补齐完再一起下」（2026-10-19 用户实测反馈）：
-   *   实测补一件详情 3.1 秒、3 路并行提速 2.75 倍，300 件要
-   *   300 × 3.1 ÷ 2.75 ≈ **338 秒（5.6 分钟）**才开始落第一个文件。
-   *   客户盯着屏幕 5 分半看不到任何东西，只能认为软件卡死了——
-   *   「一直提示在补齐，但我看没有下载」。
+   * ⚠️ 为什么必须是「补一个下一个」（2026-10-19 客户实测反馈）：
+   *   客户反馈「一直提示在补齐，但我看没有下载」。查下来是三版递进的错：
+   *     v1.8.0 全部补齐完才下 → 300 件干等 5.6 分钟零产出
+   *     v1.8.1 改成分批（20 件一批）→ 第一批仍要等 20 件补完
+   *   客户当场问出关键一句：「为什么不是补齐一个，下载一个呢？」
    *
-   * 现在改成每 BATCH 个一批：补齐这批（3~5 秒）→ 立刻下载 → 下一批。
-   * 这样**第一个文件在几秒内就出现**，之后陆续增加，
-   * 客户看得见进度、也有提前中断的余地。
+   *   攒批在任何批大小下都有问题：批越大首个文件越晚，
+   *   批越小往返开销越明显，而客户要的只是「看着它一个个往前走」。
    *
-   * 每批都会回报「已处理 N/总数」，进度不会像以前那样停在原地。
+   * 现在就是最朴素的做法：一件一件来。
+   * 实测补齐一件约 30 秒 → **第一个文件夹 30 秒内出现**，之后持续增加。
+   *
+   * 并行度保留：起 FLOW 个 worker 各自往下走，
+   * 既保证「补一个下一个」的观感，又让总耗时不至于翻成单倍。
    */
-  var PACK_BATCH = 20;      // 一批补齐多少件。太大则首个文件太晚，太小则往返开销多
+  var FLOW = 3;              // 同时推进的件数（补齐本身在后台已是 3 路并行）
 
   async function withEnrichedSelected(cb) {
     var ids = selectedIds();
@@ -595,86 +598,90 @@
       toast('请先在页面上勾选要处理的商品');
       return;
     }
-    // 分成若干批
-    var batches = [];
-    for (var i = 0; i < ids.length; i += PACK_BATCH) {
-      batches.push(ids.slice(i, i + PACK_BATCH));
+
+    // 数据够全、不必补的那些，先原地处理掉，别占流水线
+    var queue = ids.slice();
+    var cursor = 0;
+    var done = 0;
+    var missedTotal = 0;
+    var t0 = Date.now();
+
+    function toastProgress() {
+      var used = Math.round((Date.now() - t0) / 1000);
+      toast('正在处理 ' + done + '/' + queue.length + '（已用 ' + used + ' 秒）');
     }
 
-    if (batches.length === 1) {
-      await enrichOneBatch(batches[0], cb);
+    // 一个 worker：从队列里一件一件取，补齐后立刻交给回调下载
+    async function worker() {
+      while (true) {
+        var i = cursor++;
+        if (i >= queue.length) return;
+        var id = queue[i];
+        try {
+          await enrichOne(id, cb);
+        } catch (e) {
+          console.warn('[闲鱼助手] 第 ' + (i + 1) + ' 件处理出错：', e);
+        }
+        done++;
+        toastProgress();
+      }
+    }
+
+    if (queue.length <= 1) {
+      await enrichOne(queue[0], cb);
       return;
     }
-
-    toast('共 ' + ids.length + ' 件，将分 ' + batches.length +
-      ' 批处理，每批补齐后立即开始下载');
-    var t0 = Date.now();
-    var doneTotal = 0;
-
-    for (var b = 0; b < batches.length; b++) {
-      var batch = batches[b];
-      // 每批独立走一次「补齐 → 执行」，下载在这批补齐完就立刻开始
-      var okBatch = await enrichOneBatch(batch, cb, {
-        index: b + 1, total: batches.length,
-        base: doneTotal, all: ids.length
-      });
-      doneTotal += batch.length;
-      var used = Math.round((Date.now() - t0) / 1000);
-      console.log('[闲鱼助手] 第 ' + (b + 1) + '/' + batches.length +
-        ' 批完成，累计 ' + doneTotal + '/' + ids.length + '，用时 ' + used + ' 秒' +
-        (okBatch === false ? '（该批有商品没补到）' : ''));
+    toast('共 ' + queue.length + ' 件，将逐件处理：补齐一件立即下载一件');
+    var workers = [];
+    for (var w = 0; w < Math.min(FLOW, queue.length); w++) {
+      workers.push(worker());
     }
+    await Promise.all(workers);
+    console.log('[闲鱼助手] 全部完成，用时 ' +
+      Math.round((Date.now() - t0) / 1000) + ' 秒');
   }
 
   /**
-   * 补齐一批（只有这一批需要补的）然后立即执行回调。
-   * @returns {Promise<boolean>} 是否全部补齐
+   * 补齐**一件**，然后立刻执行回调（也就是下载这一件）。
+   *
+   * 这一件数据本来就够全的话，直接下载，不必走接口。
    */
-  async function enrichOneBatch(batch, cb, info) {
-    var need = batch.filter(function (id) {
-      var c = cardIndex[id] || {};
-      if (!c.itemId && !(detailMap[id] && detailMap[id].itemId)) return false;
-      return dataThin(id);
-    });
-    if (!need.length) { cb(); return true; }
-
-    var prefix = info
-      ? '第 ' + info.index + '/' + info.total + ' 批（' +
-        (info.base + 1) + '-' + (info.base + batch.length) + '/' + info.all + '）：正在补齐 '
-      : '';
-    toast(prefix + need.length + ' 个商品的详情…');
-
-    var t0 = Date.now();
+  async function enrichOne(id, cb) {
+    var need = [];
+    var c = cardIndex[id] || {};
+    if ((c.itemId || (detailMap[id] && detailMap[id].itemId)) && dataThin(id)) {
+      need = [id];
+    }
     var res = null;
+    if (need.length) {
+      var t0 = Date.now();
+      try {
+        // 单件：给了 5 分钟是防死锁。一件实际约 30 秒，
+        // 真正的保护是「别卡死」而不是「到点放弃」——
+        // 放弃的代价是这一件下不全。
+        res = await askInjected('ensure-cards', { ids: need },
+          { timeout: 5 * 60 * 1000 });
+      } catch (e) {
+        console.warn('[闲鱼助手] 补详情中断：', e);
+      }
+      var missed = (res && res.stillFailed) ? res.stillFailed.length : 0;
+      if (missed) {
+        toast('有 1 个商品两次都没取到完整详情（可能已下架或被限流），按现有信息打包');
+      }
+      console.log('[闲鱼助手] 补齐一件用时 ' +
+        Math.round((Date.now() - t0) / 1000) + ' 秒，失败 ' + missed);
+    }
+    // ★ 这一件补齐完就立刻下载，然后才轮到下一件。
+    //   把 id 传给回调 —— 回调必须只处理这一件，
+    //   否则「流水线」只是换了个说法，实际仍在整批下载。
+    //   必须 await：不 await 会让多件并发下载，
+    //   争抢下载队列和进度统计，计数会乱、
+    //   甚至互相覆盖同一目录下的 info.json。
     try {
-      // 每批只等这一批补完。300ms/件 × 20 件 ≈ 6 秒，
-      // 给 5 分钟足够——真正的保护是「别卡死」，不是「到点放弃」，
-      // 因为放弃的代价是整批商品下不全。
-      res = await askInjected('ensure-cards', { ids: need },
-        { timeout: 5 * 60 * 1000 });
+      await cb([id]);
     } catch (e) {
-      console.warn('[闲鱼助手] 补详情中断：', e);
+      console.warn('[闲鱼助手] 该件下载出错：', e);
     }
-    var used = Math.round((Date.now() - t0) / 1000);
-
-    var missed = (res && res.stillFailed) ? res.stillFailed.length : 0;
-    if (missed) {
-      toast('注意：' + missed + ' 个商品两次都没取到完整详情' +
-        '（可能已下架或被限流），将按现有信息打包');
-    }
-    console.log('[闲鱼助手] 补齐用时 ' + used + ' 秒，需补 ' + need.length +
-      ' 件，成功 ' + ((res && res.done) || 0) + '，重试成功 ' +
-      ((res && res.retried) || 0) + '，仍失败 ' + missed);
-    // ★ 必须等 cb()（也就是这批的下载）真的跑完再返回。
-    //   不 await 的话，下一批会在上一批还在下载时就开跑，
-    //   两个下载批次并发争抢下载队列和进度统计，结果计数全乱、
-    //   甚至互相覆盖 info.json。
-    try {
-      await cb();
-    } catch (e) {
-      console.warn('[闲鱼助手] 该批下载出错：', e);
-    }
-    return missed === 0;
   }
 
   /**
@@ -717,6 +724,18 @@
   function selectedItems() {
     var out = [];
     selectedIds().forEach(function (id) {
+      var d = dataOf(id);
+      if (!d || (!d.title && !d.desc && !d.image && !(d.images || []).length)) return;
+      var it = itemOf(d);
+      if (it) out.push(it);
+    });
+    return out;
+  }
+
+  /** 指定 ID 的商品包成下载任务（流水线按件调用，不用整个勾选集） */
+  function itemsOfIds(ids) {
+    var out = [];
+    (ids || []).forEach(function (id) {
       var d = dataOf(id);
       if (!d || (!d.title && !d.desc && !d.image && !(d.images || []).length)) return;
       var it = itemOf(d);
@@ -769,8 +788,8 @@
     }).slice(0, 5);
   }
 
-  async function batchDownloadImages(enriched) {
-    var items = selectedItems();
+  async function batchDownloadImages(ids) {
+    var items = Array.isArray(ids) ? itemsOfIds(ids) : selectedItems();
     if (!items.length) { toast('勾选的商品里没有可用主图'); return; }
     var totalImg = items.reduce(function (n, it) { return n + it.images.length; }, 0);
     toast('共 ' + items.length + ' 个商品 / ' + totalImg + ' 张图，正在下载…');
@@ -784,8 +803,8 @@
       : '批量下载失败：' + errText(res) + failNote(res, enriched));
   }
 
-  async function batchSaveText(enriched) {
-    var items = selectedItems();
+  async function batchSaveText(ids) {
+    var items = Array.isArray(ids) ? itemsOfIds(ids) : selectedItems();
     if (!items.length) { toast('没有可保存的商品'); return; }
     var res = await callBg({
       type: 'xy:download-items',
@@ -828,10 +847,13 @@
     toast(r2 && r2.ok ? '下载历史已清空' : '清空失败');
   }
 
-  async function batchPack(enriched, force) {
-    var items = selectedItems();
-    if (!items.length) { toast('没有可处理的商品'); return; }
-    toast('正在处理 ' + items.length + ' 个商品…');
+  async function batchPack(ids, force) {
+    // 流水线传进来的是「当前这一件」，不是整个勾选集
+    var items = Array.isArray(ids) ? itemsOfIds(ids) : selectedItems();
+    if (!items.length) return;
+    // 单件不弹提示：流水线里每件都弹会刷屏，
+    // 进度由 withEnrichedSelected 的统一提示负责
+    if (items.length > 1) toast('正在处理 ' + items.length + ' 个商品…');
     var res = await callBg({
       type: 'xy:download-items',
       items: items,
