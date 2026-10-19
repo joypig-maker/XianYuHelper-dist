@@ -601,22 +601,65 @@
 
     // 数据够全、不必补的那些，先原地处理掉，别占流水线
     var queue = ids.slice();
+
+    // ★★ 先问后台：哪些已经下载过？（2026-10-19 用户实测发现的问题）
+    //   判重原本只在下载那一步做，于是**已下载的商品仍要先花 30 秒补齐详情**，
+    //   才轮到被判重跳过 —— 用户看到的就是「又提示补齐商品详情」，
+    //   完全感受不到跳过。顺序必须反过来：先问、先剔、再补。
+    var alreadyDirs = {};
+    try {
+      var probe = itemsOfIds(queue).map(function (it) {
+        return { dir: it.dir, site: it.site, itemId: it.itemId };
+      });
+      if (probe.length) {
+        var chk = await callBg({ type: 'xy:check-history', items: probe });
+        if (chk && chk.ok && chk.dirs && chk.dirs.length) {
+          chk.dirs.forEach(function (d) { alreadyDirs[d] = true; });
+        }
+      }
+    } catch (e) {
+      console.warn('[闲鱼助手] 下载历史预检失败（不影响下载）：', e);
+    }
+
+    var queueItems = {};
+    itemsOfIds(queue).forEach(function (it) { queueItems[it.dir] = it; });
+    var already = Object.keys(alreadyDirs).map(function (d) { return queueItems[d]; })
+      .filter(Boolean);
+
+    if (already.length) {
+      toast('勾选的 ' + queue.length + ' 个里，有 ' + already.length +
+        ' 个之前已下载过，将跳过');
+    }
+
+    // 真正要处理的：没下过的
+    var todo = queue.filter(function (id) {
+      var d = dataOf(id);
+      if (!d) return false;
+      var it = queueItems[dirOf(d)];
+      return !it || !alreadyDirs[it.dir];
+    });
+
+    if (!todo.length) {
+      toast('勾选的商品都下过了，没有需要处理的' +
+        '（要重下请点「重下勾选商品」）');
+      return;
+    }
+
     var cursor = 0;
     var done = 0;
-    var missedTotal = 0;
     var t0 = Date.now();
 
     function toastProgress() {
       var used = Math.round((Date.now() - t0) / 1000);
-      toast('正在处理 ' + done + '/' + queue.length + '（已用 ' + used + ' 秒）');
+      toast('正在处理 ' + done + '/' + todo.length + '（已用 ' + used + ' 秒）');
     }
 
     // 一个 worker：从队列里一件一件取，补齐后立刻交给回调下载
     async function worker() {
       while (true) {
         var i = cursor++;
-        if (i >= queue.length) return;
-        var id = queue[i];
+        if (i >= todo.length) return;
+        var id = todo[i];
         try {
           await enrichOne(id, cb);
         } catch (e) {
@@ -627,13 +670,13 @@
       }
     }
 
-    if (queue.length <= 1) {
-      await enrichOne(queue[0], cb);
+    if (todo.length <= 1) {
+      await enrichOne(todo[0], cb);
       return;
     }
-    toast('共 ' + queue.length + ' 件，将逐件处理：补齐一件立即下载一件');
+    toast('共 ' + todo.length + ' 件待处理，将逐件进行：补齐一件立即下载一件');
     var workers = [];
-    for (var w = 0; w < Math.min(FLOW, queue.length); w++) {
+    for (var w = 0; w < Math.min(FLOW, todo.length); w++) {
       workers.push(worker());
     }
     await Promise.all(workers);

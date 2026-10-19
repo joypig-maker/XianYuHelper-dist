@@ -581,32 +581,48 @@ function historyOnDisk(items) {
       return String(p || '').replace(/\\/g, '/').replace(/^\/+/, '');
     };
 
-    var left = list.length;
-    var hit = {};
+    // 把要查的标记文件名收成一组
+    var wantMarks = {};
     list.forEach(function (it) {
-      var mark = U.idMarkFileName(it.site, it.itemId);
-      // ⚠️ 不拿目录名参与匹配：目录名默认模板是 `{shop}_{title}_{itemId}`，
-      // 卖家一改标题目录就变了，拿它当条件等于没判重（v1.6.2 的坑）。
-      // 标记文件名里带完整「站点_商品ID」，全局唯一，用它认就行。
-      // 代价是没法区分「同名商品被下到不同目录」——但那本来就不该下第二遍。
-      try {
-        chrome.downloads.search({ filename: mark, exists: true }, function (rows) {
-          if (rows && rows.length) {
-            var ok = rows.some(function (r) {
-              if (!r || r.state !== 'complete' || !r.exists) return false;
-              var f = norm(r.filename);
-              var base = f.slice(f.lastIndexOf('/') + 1);
-              // 兼容 uniquify 产出的「已下载标识_xy_123.txt (1)」重名副本
-              return base === mark || base.indexOf(mark) === 0;
-            });
-            if (ok) hit[it.dir] = true;
-          }
-          if (--left <= 0) resolve(hit);
-        });
-      } catch (e) {
-        if (--left <= 0) resolve(hit);
-      }
+      wantMarks[U.idMarkFileName(it.site, it.itemId)] = true;
     });
+
+    var hit = {};
+    try {
+      // ⚠️⚠️ 不传 filename 参数，改为**拉全部下载记录自己匹配**。
+      //   原因：downloads.search 的 filename 参数要求**完整绝对路径**
+      //   （Chrome 文档原话：The absolute path of the file），
+      //   传「已下载标识_xy_123.txt」这种片段是匹配不上的 ——
+      //   而我们只知道相对于用户保存目录的相对路径，不知道盘符和上级目录。
+      //   v1.7.0 一直用错这个 API，所以判重从来没生效过。
+      chrome.downloads.search({}, function (rows) {
+        if (!rows || !rows.length) return resolve({});
+        // 先把磁盘上真实存在的标记文件名收成一组
+        var onDisk = {};
+        rows.forEach(function (r) {
+          if (!r || r.state !== 'complete' || !r.exists) return;
+          var f = norm(r.filename);
+          var base = f.slice(f.lastIndexOf('/') + 1);
+          if (!base) return;
+          // 精确匹配
+          if (wantMarks[base]) { onDisk[base] = true; return; }
+          // ⚠️ 还要兼容 uniquify 的重名副本「已下载标识_xy_123.txt (1)」。
+          //   强制重下时写过一次就可能留下这种副本，只认精确名会漏跳过
+          //   （用户「下载 30 个再勾一次」的诉求就落在这里）。
+          //   去尾部「 (数字)」后再比一次。
+          var clean = base.replace(/ \(\d+\)$/, '');
+          if (wantMarks[clean]) onDisk[clean] = true;
+        });
+        if (!Object.keys(onDisk).length) return resolve({});
+        list.forEach(function (it) {
+          var mark = U.idMarkFileName(it.site, it.itemId);
+          if (onDisk[mark]) hit[it.dir] = true;
+        });
+        resolve(hit);
+      });
+    } catch (e) {
+      resolve({});
+    }
   });
 }
 
@@ -1097,6 +1113,31 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   }
 
   // 批量下载：勾选的多个商品，各自一个目录（图片 + 文案）
+  // ★ 预检：在补齐详情**之前**先问哪些已经下载过。
+  //   顺序反了的话，已下载的商品仍要先花 30 秒补齐详情，
+  //   才轮到判重跳过 —— 用户看到的是「又提示补齐商品详情」，
+  //   判重形同虚设（2026-10-19 用户实测发现）。
+  if (msg.type === 'xy:check-history') {
+    var probe = (msg.items || []).filter(function (it) {
+      return it && it.dir && U.idMarkFileName(it.site, it.itemId);
+    });
+    if (!probe.length) {
+      sendResponse({ ok: true, skipped: 0, dirs: [] });
+      return true;
+    }
+    Promise.all([historyFilter(probe), historyOnDisk(probe)]).then(function (rs) {
+      var store = rs[0] || {};
+      var disk = rs[1] || {};
+      var dirs = [];
+      probe.forEach(function (it) {
+        var k = historyKey(it);
+        if ((k && store[k]) || disk[it.dir]) dirs.push(it.dir);
+      });
+      sendResponse({ ok: true, skipped: dirs.length, dirs: dirs });
+    });
+    return true;
+  }
+
   if (msg.type === 'xy:download-items') {
     var allItems = (msg.items || []).filter(function (it) { return it && it.dir; });
     if (!allItems.length) {
