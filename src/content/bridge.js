@@ -573,65 +573,108 @@
   }
 
   /**
-   * 先把选中商品的详情补齐（只补有缺的），再执行下载。
+   * 批量打包：**分批流水线**——补齐一批、下载一批、再补下一批。
    *
-   * ⚠️ 这里原来有个 60 秒硬超时，超时后就用「现有数据」继续打包。
-   *    实测补一件详情约 3.1 秒（含限速），100 件要 **310 秒** ——
-   *    60 秒只够跑 19 件，剩下的 80 多件全部用列表页的薄数据打包，
-   *    于是「勾了 100 个，下来 92 个」这种稳定漏下。
+   * ⚠️ 为什么不能「全部补齐完再一起下」（2026-10-19 用户实测反馈）：
+   *   实测补一件详情 3.1 秒、3 路并行提速 2.75 倍，300 件要
+   *   300 × 3.1 ÷ 2.75 ≈ **338 秒（5.6 分钟）**才开始落第一个文件。
+   *   客户盯着屏幕 5 分半看不到任何东西，只能认为软件卡死了——
+   *   「一直提示在补齐，但我看没有下载」。
    *
-   *    而且丢的是整段：超时时正在补的和还没开始的一起丢，
-   *    用户没有任何提示，只看到数量不对。
+   * 现在改成每 BATCH 个一批：补齐这批（3~5 秒）→ 立刻下载 → 下一批。
+   * 这样**第一个文件在几秒内就出现**，之后陆续增加，
+   * 客户看得见进度、也有提前中断的余地。
    *
-   * 现在改成：
-   *   · **不设硬超时**，一直等到全部补完（进度条实时更新，用户看得见）
-   *   · **补完再下载**，不会出现「补一半就开始下」
-   *   · 真卡住了由后端的 8 次重试兜底，最坏也只是某几件取不到，
-   *     不影响其余的照常下载
+   * 每批都会回报「已处理 N/总数」，进度不会像以前那样停在原地。
    */
+  var PACK_BATCH = 20;      // 一批补齐多少件。太大则首个文件太晚，太小则往返开销多
+
   async function withEnrichedSelected(cb) {
     var ids = selectedIds();
     if (!ids.length) {
       toast('请先在页面上勾选要处理的商品');
       return;
     }
-    var need = ids.filter(function (id) {
+    // 分成若干批
+    var batches = [];
+    for (var i = 0; i < ids.length; i += PACK_BATCH) {
+      batches.push(ids.slice(i, i + PACK_BATCH));
+    }
+
+    if (batches.length === 1) {
+      await enrichOneBatch(batches[0], cb);
+      return;
+    }
+
+    toast('共 ' + ids.length + ' 件，将分 ' + batches.length +
+      ' 批处理，每批补齐后立即开始下载');
+    var t0 = Date.now();
+    var doneTotal = 0;
+
+    for (var b = 0; b < batches.length; b++) {
+      var batch = batches[b];
+      // 每批独立走一次「补齐 → 执行」，下载在这批补齐完就立刻开始
+      var okBatch = await enrichOneBatch(batch, cb, {
+        index: b + 1, total: batches.length,
+        base: doneTotal, all: ids.length
+      });
+      doneTotal += batch.length;
+      var used = Math.round((Date.now() - t0) / 1000);
+      console.log('[闲鱼助手] 第 ' + (b + 1) + '/' + batches.length +
+        ' 批完成，累计 ' + doneTotal + '/' + ids.length + '，用时 ' + used + ' 秒' +
+        (okBatch === false ? '（该批有商品没补到）' : ''));
+    }
+  }
+
+  /**
+   * 补齐一批（只有这一批需要补的）然后立即执行回调。
+   * @returns {Promise<boolean>} 是否全部补齐
+   */
+  async function enrichOneBatch(batch, cb, info) {
+    var need = batch.filter(function (id) {
       var c = cardIndex[id] || {};
       if (!c.itemId && !(detailMap[id] && detailMap[id].itemId)) return false;
       return dataThin(id);
     });
-    if (!need.length) {
-      cb();
-      return;
-    }
-    toast('正在补齐 ' + need.length + ' 个商品的详情…');
-    // 进度由 injected 的 ensure-progress 实时回报（那边每补一件就发一次），
-    // 这里不再另起定时器 —— 两个定时器会互相覆盖，
-    // 反而让进度看上去卡住不动。
+    if (!need.length) { cb(); return true; }
+
+    var prefix = info
+      ? '第 ' + info.index + '/' + info.total + ' 批（' +
+        (info.base + 1) + '-' + (info.base + batch.length) + '/' + info.all + '）：正在补齐 '
+      : '';
+    toast(prefix + need.length + ' 个商品的详情…');
+
     var t0 = Date.now();
     var res = null;
     try {
-      // 超时放到很宽：按每件 3.1 秒估，100 件约 310 秒，
-      // 留 3 倍余量。真正的保护是「继续等」而不是「到点放弃」——
-      // 放弃的代价是整段商品下不全，比多等几十秒严重得多。
+      // 每批只等这一批补完。300ms/件 × 20 件 ≈ 6 秒，
+      // 给 5 分钟足够——真正的保护是「别卡死」，不是「到点放弃」，
+      // 因为放弃的代价是整批商品下不全。
       res = await askInjected('ensure-cards', { ids: need },
-        { timeout: 15 * 60 * 1000 });
+        { timeout: 5 * 60 * 1000 });
     } catch (e) {
       console.warn('[闲鱼助手] 补详情中断：', e);
     }
     var used = Math.round((Date.now() - t0) / 1000);
 
-    // 如实告诉用户有几件最终没补到。静默少掉几件是最糟的：
-    // 用户只看到「勾了 100 下来 92」，根本不知道少在哪。
     var missed = (res && res.stillFailed) ? res.stillFailed.length : 0;
     if (missed) {
-      toast('注意：有 ' + missed + ' 个商品两次都没取到完整详情' +
+      toast('注意：' + missed + ' 个商品两次都没取到完整详情' +
         '（可能已下架或被限流），将按现有信息打包');
     }
-    console.log('[闲鱼助手] 补详情用时 ' + used + ' 秒，需补 ' + need.length +
+    console.log('[闲鱼助手] 补齐用时 ' + used + ' 秒，需补 ' + need.length +
       ' 件，成功 ' + ((res && res.done) || 0) + '，重试成功 ' +
       ((res && res.retried) || 0) + '，仍失败 ' + missed);
-    cb();
+    // ★ 必须等 cb()（也就是这批的下载）真的跑完再返回。
+    //   不 await 的话，下一批会在上一批还在下载时就开跑，
+    //   两个下载批次并发争抢下载队列和进度统计，结果计数全乱、
+    //   甚至互相覆盖 info.json。
+    try {
+      await cb();
+    } catch (e) {
+      console.warn('[闲鱼助手] 该批下载出错：', e);
+    }
+    return missed === 0;
   }
 
   /**

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "多站点商品采集助手 - 闲鱼 / 1688 / 淘宝 / 京东",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "minimum_chrome_version": "111.0.0.0",
   "offline_enabled": true,
   "description": "闲鱼、1688、淘宝天猫、京东 列表页/店铺页批量勾选商品，复制链接、标题、店铺名，批量下载主图与保存文案到本地。",

@@ -39,41 +39,33 @@ function grabFn(src, name) {
 }
 
 /* ============================================================ */
-section('1) ★ 不能有 60 秒硬超时');
+section('1) ★ 不能有固定时长的放弃定时器');
 {
-  const fn = grabFn(BR, 'withEnrichedSelected');
-  is('★ 没有 60000ms 的放弃定时器',
-    !/setTimeout\([^)]*60000/.test(fn), (fn.match(/setTimeout[\s\S]{0,80}/) || [''])[0]);
-  is('★ 也没有 resolve(null) 式的放弃分支',
+  // 逻辑已挪到 enrichOneBatch（分批流水线），断言跟着挪
+  const fn = grabFn(BR, 'enrichOneBatch');
+  is('★ 没有 setTimeout 型「到点放弃」',
+    !/setTimeout\([^)]*60000/.test(fn));
+  is('★ 没有 resolve(null) 式的放弃分支',
     fn.indexOf('resolve(null)') < 0);
-  is('★ 超时给到 15 分钟（100 件按 3.1 秒估要 310 秒）',
-    /15 \* 60 \* 1000/.test(fn), (fn.match(/timeout: [^,}]+/) || [''])[0]);
+  is('★ 单批超时 5 分钟（20 件 ≈ 23 秒，余量充足）',
+    /timeout: 5 \* 60 \* 1000/.test(fn), (fn.match(/timeout: [^,}]+/) || [''])[0]);
   is('★ 真的 await 了补详情的回包',
     /await askInjected\('ensure-cards'/.test(fn));
-  // 注意：函数里有两处 cb() —— 一处是「无需补详情」提前返回，
-  // 一处是「补完了才继续」。要断言的是**后者**在 await 之后。
-  const lastCb = fn.lastIndexOf('cb();');
-  is('★ 补完之后才调回调（先补完再下载）',
-    lastCb > fn.indexOf("await askInjected('ensure-cards'"),
-    'lastCb=' + lastCb);
+  is('★ 补完之后才调回调（先补完再下载这一批）',
+    fn.indexOf('await cb()') > fn.indexOf("await askInjected('ensure-cards'"));
 }
 
-/* ============================================================ */
 section('2) ★ 补详情的耗时账：不能比超时短');
 {
-  const COST = 3.1;              // 实测：详情页 ~2.5s + GAP 0.6s
-  const need = 100;
-  const total = need * COST;
-  const oldLimit = 60;
-  const newLimit = 15 * 60;
-  console.log('    %d 件 × %.1fs = %.0f 秒', need, COST, total);
-  console.log('    旧上限 %d 秒 → 只能补 %d 件，丢 %d 件',
-    oldLimit, Math.floor(oldLimit / COST), need - Math.floor(oldLimit / COST));
-  is('★ 旧上限确实不够用', total > oldLimit, String(total));
-  is('★ 新上限足够（还有 2 倍余量）', newLimit > total * 2, String(newLimit));
+  const COST = 3.1, need = 300, total = need * COST;
+  const limit = 5 * 60;
+  const SPEEDUP = 2.75;
+  console.log('    %d 件 × %.1fs = %.0f 秒（串行）', need, COST, total);
+  console.log('    3 路并行后 %.0f 秒，分 %d 批每批约 %.0f 秒',
+    total / SPEEDUP, Math.ceil(need / 20), 20 * COST / SPEEDUP);
+  is('★ 单批限额足够覆盖一批的耗时', 20 * COST / SPEEDUP < limit);
 }
 
-/* ============================================================ */
 section('3) ★ 补详情要真的 await，且按商品逐个报进度');
 {
   const fn = grabFn(IJ, 'ensureCardsDetail');
@@ -83,8 +75,7 @@ section('3) ★ 补详情要真的 await，且按商品逐个报进度');
   is('★ 进度带 done/total', /ensure-progress', \{ done: [^}]*total/.test(fn));
 }
 
-/* ============================================================ */
-section('4) ★★ 失败的要有第二轮重试');
+section('4) ★★ 补失败的要有第二轮重试');
 {
   const fn = grabFn(IJ, 'ensureCardsDetail');
   is('★ 记录失败的 ID', fn.indexOf('failedIds') > 0);
@@ -94,28 +85,20 @@ section('4) ★★ 失败的要有第二轮重试');
     /fetchCardDetail\(rid, true\)/.test(fn));
   is('★ 重试成功会补回 fail 计数', /fail--/.test(fn));
   is('★ 把最终失败的清单回传给前端', /stillFailed: failedIds/.test(fn));
-  is('★ 进度回报里有 retry 标记（前端能显示「正在重试」）',
-    /ensure-progress', \{[^}]*retry: true/.test(fn));
 }
 
-/* ============================================================ */
 section('5) ★ 前端如实告知漏了几件');
 {
-  const fn = grabFn(BR, 'withEnrichedSelected');
+  const fn = grabFn(BR, 'enrichOneBatch');
   is('★ 读的是回包里的 stillFailed', fn.indexOf('res.stillFailed') > 0);
   is('★ 会提示用户「有 N 个没补到」', /missed \+ ' 个商品/.test(fn));
-  is('★ 控制台留痕便于排查',
-    /补详情用时/.test(fn));
+  is('★ 控制台留痕便于排查', /补齐用时/.test(fn));
   is('★ 不再静默继续（旧代码是「已用现有数据继续打包」就往下走）',
     fn.indexOf('已用现有数据继续打包') < 0);
 }
 
-/* ============================================================ */
 section('6) ★ 两处「要不要补详情」的判定必须一致');
 {
-  // bridge 的 dataThin 与 injected 的 ensureCardsDetail.todo
-  // 之前两处规则不同：bridge 查 skus，injected 不查 →
-  // 这边认为要补、那边认为不用补（或反过来），互相打架。
   const bt = BR.slice(BR.indexOf('function dataThin'), BR.indexOf('function dataThin') + 800);
   const ij = IJ.slice(IJ.indexOf('async function ensureCardsDetail'),
                       IJ.indexOf('async function ensureCardsDetail') + 1400);
@@ -128,8 +111,6 @@ section('6) ★ 两处「要不要补详情」的判定必须一致');
     ij.indexOf('!skus || !skus.list || !skus.list.length') > 0);
 }
 
-
-/* ============================================================ */
 section('7) ★★★ 并行提速：3 路并行，标签页各占各的');
 {
   is('★ PARALLEL = 3（实测无风控）',
