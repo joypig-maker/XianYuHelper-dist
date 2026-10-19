@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>闲鱼助手</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header class="hd">
+    <div class="logo">🐟</div>
+    <div>
+      <div class="t1">闲鱼助手</div>
+      <div class="t2" id="site-state">未在闲鱼商品页</div>
+    </div>
+  </header>
+
+  <section class="card" id="item-card">
+    <div class="item-row">
+      <img id="item-img" class="thumb" alt="" />
+      <div class="item-main">
+        <div class="item-title" id="item-title">打开闲鱼商品详情页后，这里会显示商品信息</div>
+        <div class="item-meta">
+          <span class="price" id="item-price"></span>
+          <span class="shop" id="item-shop"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <button id="btn-link">复制链接</button>
+      <button id="btn-title">复制标题</button>
+      <button id="btn-shop">复制店铺名</button>
+      <button id="btn-all">复制全部</button>
+      <button id="btn-img">下载主图</button>
+      <button id="btn-text">保存文案</button>
+      <button id="btn-pack" class="primary">一键打包（图+文案）</button>
+    </div>
+  </section>
+
+  <section class="card list-card" id="list-card" style="display:none">
+    <div class="sec-title">当前列表页</div>
+    <div class="sec-desc" id="list-desc"></div>
+    <div class="grid">
+      <button id="btn-links">复制全部链接</button>
+      <button id="btn-export">导出列表</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="sec-title">设置</div>
+
+    <label class="row">
+      <span>保存到下载目录</span>
+      <input type="text" id="cfg-dir" placeholder="downloaded_items" />
+    </label>
+    <p class="hint">
+      浏览器「下载」文件夹<strong>下面</strong>的子目录名，支持多层。默认
+      <code>downloaded_items</code>，与铺货软件约定的目录一致，一般不用改。<br />
+      要存到别的盘，请先改 Chrome 的下载位置：
+      <code>chrome://settings/downloads</code> 的「下载位置」，这里再填它下面的子目录。
+    </p>
+
+    <label class="row">
+      <span>文件夹命名</span>
+      <input type="text" id="cfg-tpl" placeholder="{itemId}" />
+    </label>
+    <div class="hint">可用变量：{itemId} 商品ID、{title} 标题、{shop} 店铺名、{price} 价格、{date} 日期</div>
+
+    <label class="row">
+      <span>文案格式</span>
+      <select id="cfg-format">
+        <option value="txt">TXT 纯文本</option>
+        <option value="md">Markdown</option>
+        <option value="json">JSON 结构化</option>
+      </select>
+    </label>
+
+    <label class="row switch">
+      <span>页面显示悬浮面板</span>
+      <input type="checkbox" id="cfg-panel" />
+    </label>
+
+    <label class="row switch">
+      <span>列表页显示勾选框</span>
+      <input type="checkbox" id="cfg-check" />
+    </label>
+
+    <label class="row switch">
+      <span>下载图片补 Referer</span>
+      <input type="checkbox" id="cfg-hotlink" />
+    </label>
+    <p class="hint">
+      勾选后，下载 1688 主图时自动补上
+      <code>Referer: https://www.1688.com/</code>，绕开 CDN 防盗链导致的
+      <code>403</code> 漏图。只作用于 1688 的图片地址，闲鱼 / 淘宝的不动。
+      若发现下载异常，关掉这一项即可。
+    </p>
+  </section>
+
+  <footer class="ft">
+    <button id="btn-folder" class="link">打开下载文件夹</button>
+    <span class="ver">v1.0.0</span>
+  </footer>
+
+  <div id="toast" class="toast"></div>
+  <script src="../common/sites.js"></script>
+  <script src="../common/util.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

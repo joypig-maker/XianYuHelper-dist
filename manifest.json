@@ -1,0 +1,111 @@
+{
+  "manifest_version": 3,
+  "name": "多站点商品采集助手 - 闲鱼 / 1688 / 淘宝 / 京东",
+  "version": "1.8.0",
+  "minimum_chrome_version": "111.0.0.0",
+  "offline_enabled": true,
+  "description": "闲鱼、1688、淘宝天猫、京东 列表页/店铺页批量勾选商品，复制链接、标题、店铺名，批量下载主图与保存文案到本地。",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "action": {
+    "default_title": "闲鱼助手",
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/background/service_worker.js"
+  },
+  "permissions": [
+    "downloads",
+    "storage",
+    "tabs",
+    "declarativeNetRequest"
+  ],
+  "host_permissions": [
+    "https://*.goofish.com/*",
+    "https://*.xianyu.com/*",
+    "https://*.1688.com/*",
+    "https://*.taobao.com/*",
+    "https://*.tmall.com/*",
+    "https://*.tmall.hk/*",
+    "https://*.jd.com/*",
+    "https://*.360buyimg.com/*",
+    "https://*.alicdn.com/*",
+    "https://*.tbcdn.cn/*",
+    "https://*.taobaocdn.com/*",
+    "http://*.alicdn.com/*",
+    "http://*.tbcdn.cn/*",
+    "http://*.taobaocdn.com/*",
+    "http://*.360buyimg.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.goofish.com/*",
+        "https://*.xianyu.com/*",
+        "https://*.1688.com/*",
+        "https://*.taobao.com/*",
+        "https://*.tmall.com/*",
+        "https://*.tmall.hk/*",
+        "https://*.jd.com/*"
+      ],
+      "js": [
+        "src/common/sites.js",
+        "src/common/util.js",
+        "src/common/postbus.js",
+        "src/common/extract.js",
+        "src/content/injected.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "https://*.goofish.com/*",
+        "https://*.xianyu.com/*",
+        "https://*.1688.com/*",
+        "https://*.taobao.com/*",
+        "https://*.tmall.com/*",
+        "https://*.tmall.hk/*",
+        "https://*.jd.com/*"
+      ],
+      "js": [
+        "src/common/sites.js",
+        "src/common/util.js",
+        "src/common/postbus.js",
+        "src/content/bridge.js"
+      ],
+      "css": [
+        "src/content/panel.css"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "https://*.goofish.com/*",
+        "https://*.xianyu.com/*",
+        "https://*.1688.com/*",
+        "https://*.taobao.com/*",
+        "https://*.tmall.com/*",
+        "https://*.tmall.hk/*",
+        "https://*.jd.com/*"
+      ],
+      "resources": [
+        "src/common/sites.js",
+        "src/common/util.js"
+      ]
+    }
+  ]
+}

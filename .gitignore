@@ -1,0 +1,38 @@
+# 构建产物：由 tools/build_release.py 生成，随时可重建
+dist/
+build/
+deploy/
+
+# 探针/调试残留：每次实测生成，含商品数据，不入库
+net-*.json
+闲鱼规格图探针结果.json
+*.crdownload
+*.tmp
+
+# 真实商品样本：体积大且含商家/价格等经营数据
+# 需要时单独取用，不要进版本库
+tools/fixtures/xy-net-*.json
+tools/fixtures/xy-raw-*.json
+
+# Agent 工作记录：本地开发日志，不属于产品代码
+.workbuddy/
+
+# 竞品插件解包（逆向分析用）
+# 这类目录有 9~36 MB，是别人的产物，不该进我们的版本库。
+# 需要分析时从原始 crx 重新解包即可。
+1688-extension/
+店透视-extension/
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.vscode/
+.idea/
+
+# 日志
+*.log
+# 探针输出：临时诊断数据，每次跑都会变
+tools/_out/
+tools/_*.js

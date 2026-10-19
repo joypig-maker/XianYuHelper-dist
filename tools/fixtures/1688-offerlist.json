@@ -1,0 +1,267 @@
+{
+  "content": {
+    "offerList": [
+      {
+        "id": "604409413261",
+        "subject": "厂家现货儿童头饰皇冠魔法棒套装公主女孩发箍配饰女童饰品批发",
+        "offerImages": [
+          {
+            "size220x220ImageURI": "img/ibank/12485623687_580926861.220x220.jpg",
+            "imageURI": "img/ibank/12485623687_580926861.jpg",
+            "searchImageURI": "img/ibank/12485623687_580926861.search.jpg",
+            "size230x230ImageURI": "img/ibank/12485623687_580926861.230x230.jpg",
+            "summImageURI": "img/ibank/12485623687_580926861.summ.jpg",
+            "class": "com.alibaba.cbu.winport.wireless.service.model.OfferImage",
+            "size310x310ImageURI": "img/ibank/12485623687_580926861.310x310.jpg",
+            "size120x120ImageURI": "img/ibank/12485623687_580926861.120x120.jpg"
+          },
+          {
+            "size220x220ImageURI": "img/ibank/O1CN01xOHcGF1RXSlMGd7J6_!!2201448362121-0-cib.220x220.jpg",
+            "imageURI": "img/ibank/O1CN01xOHcGF1RXSlMGd7J6_!!2201448362121-0-cib.jpg",
+            "searchImageURI": "img/ibank/O1CN01xOHcGF1RXSlMGd7J6_!!2201448362121-0-cib.search.jpg",
+            "size230x230ImageURI": "img/ibank/O1CN01xOHcGF1RXSlMGd7J6_!!2201448362121-0-cib.230x230.jpg",
+            "summImageURI": "img/ibank/O1CN01xOHcGF1RXSlMGd7J6_!!2201448362121-0-cib.summ.jpg",
+            "class": "com.alibaba.cbu.winport.wireless.service.model.OfferImage",
+            "size310x310ImageURI": "img/ibank/O1CN01xOHcGF1RXSlMGd7J6_!!2201448362121-0-cib.310x310.jpg",
+            "size120x120ImageURI": "img/ibank/O1CN01xOHcGF1RXSlMGd7J6_!!2201448362121-0-cib.120x120.jpg"
+          },
+          {
+            "size220x220ImageURI": "img/ibank/O1CN017GV1PW1RXSlREa9h8_!!2201448362121-0-cib.220x220.jpg",
+            "imageURI": "img/ibank/O1CN017GV1PW1RXSlREa9h8_!!2201448362121-0-cib.jpg",
+            "searchImageURI": "img/ibank/O1CN017GV1PW1RXSlREa9h8_!!2201448362121-0-cib.search.jpg",
+            "size230x230ImageURI": "img/ibank/O1CN017GV1PW1RXSlREa9h8_!!2201448362121-0-cib.230x230.jpg",
+            "summImageURI": "img/ibank/O1CN017GV1PW1RXSlREa9h8_!!2201448362121-0-cib.summ.jpg",
+            "class": "com.alibaba.cbu.winport.wireless.service.model.OfferImage",
+            "size310x310ImageURI": "img/ibank/O1CN017GV1PW1RXSlREa9h8_!!2201448362121-0-cib.310x310.jpg",
+            "size120x120ImageURI": "img/ibank/O1CN017GV1PW1RXSlREa9h8_!!2201448362121-0-cib.120x120.jpg"
+          }
+        ],
+        "consignPrice": "0.95",
+        "priceSegments": [],
+        "finalPriceVo": {
+          "priceUnit": "¥",
+          "priceView": {
+            "humpLowPart": ".86",
+            "humpHighPart": "0",
+            "class": "com.alibaba.cbu.winport.wireless.api.etl.model.offer.PriceVO$PriceView"
+          },
+          "color": "#ff2900",
+          "fontSize": "24px",
+          "class": "com.alibaba.cbu.winport.wireless.api.etl.model.offer.PriceVO",
+          "priceMoney": "86"
+        },
+        "memberId": "b2b-22014483621215395d",
+        "saleQuantity": "0"
+      },
+      {
+        "id": "634638623449",
+        "subject": "厂家现货韩版儿童头饰皇冠公主小女孩装扮皇冠发箍配饰女饰品批发",
+        "offerImages": [
+          {
+            "size220x220ImageURI": "img/ibank/O1CN01kc8lZB1RXSlQ8Oy9I_!!2201448362121-0-cib.220x220.jpg",
+            "imageURI": "img/ibank/O1CN01kc8lZB1RXSlQ8Oy9I_!!2201448362121-0-cib.jpg",
+            "searchImageURI": "img/ibank/O1CN01kc8lZB1RXSlQ8Oy9I_!!2201448362121-0-cib.search.jpg",
+            "size230x230ImageURI": "img/ibank/O1CN01kc8lZB1RXSlQ8Oy9I_!!2201448362121-0-cib.230x230.jpg",
+            "summImageURI": "img/ibank/O1CN01kc8lZB1RXSlQ8Oy9I_!!2201448362121-0-cib.summ.jpg",
+            "class": "com.alibaba.cbu.winport.wireless.service.model.OfferImage",
+            "size310x310ImageURI": "img/ibank/O1CN01kc8lZB1RXSlQ8Oy9I_!!2201448362121-0-cib.310x310.jpg",
+            "size120x120ImageURI": "img/ibank/O1CN01kc8lZB1RXSlQ8Oy9I_!!2201448362121-0-cib.120x120.jpg"
+          },
+          {
+            "size220x220ImageURI": "img/ibank/O1CN01VilY831RXSlNBZ2pf_!!2201448362121-0-cib.220x220.jpg",
+            "imageURI": "img/ibank/O1CN01VilY831RXSlNBZ2pf_!!2201448362121-0-cib.jpg",
+            "searchImageURI": "img/ibank/O1CN01VilY831RXSlNBZ2pf_!!2201448362121-0-cib.search.jpg",
+            "size230x230ImageURI": "img/ibank/O1CN01VilY831RXSlNBZ2pf_!!2201448362121-0-cib.230x230.jpg",
+            "summImageURI": "img/ibank/O1CN01VilY831RXSlNBZ2pf_!!2201448362121-0-cib.summ.jpg",
+            "class": "com.alibaba.cbu.winport.wireless.service.model.OfferImage",
+            "size310x310ImageURI": "img/ibank/O1CN01VilY831RXSlNBZ2pf_!!2201448362121-0-cib.310x310.jpg",
+            "size120x120ImageURI": "img/ibank/O1CN01VilY831RXSlNBZ2pf_!!2201448362121-0-cib.120x120.jpg"
+          },
+          {
+            "size220x220ImageURI": "img/ibank/O1CN01l6e0qc1RXSlCl5Rob_!!2201448362121-0-cib.220x220.jpg",
+            "imageURI": "img/ibank/O1CN01l6e0qc1RXSlCl5Rob_!!2201448362121-0-cib.jpg",
+            "searchImageURI": "img/ibank/O1CN01l6e0qc1RXSlCl5Rob_!!2201448362121-0-cib.search.jpg",
+            "size230x230ImageURI": "img/ibank/O1CN01l6e0qc1RXSlCl5Rob_!!2201448362121-0-cib.230x230.jpg",
+            "summImageURI": "img/ibank/O1CN01l6e0qc1RXSlCl5Rob_!!2201448362121-0-cib.summ.jpg",
+            "class": "com.alibaba.cbu.winport.wireless.service.model.OfferImage",
+            "size310x310ImageURI": "img/ibank/O1CN01l6e0qc1RXSlCl5Rob_!!2201448362121-0-cib.310x310.jpg",
+            "size120x120ImageURI": "img/ibank/O1CN01l6e0qc1RXSlCl5Rob_!!2201448362121-0-cib.120x120.jpg"
+          }
+        ],
+        "consignPrice": "0.94",
+        "priceSegments": [],
+        "finalPriceVo": {
+          "priceUnit": "¥",
+          "priceView": {
+            "humpLowPart": ".86",
+            "humpHighPart": "0",
+            "class": "com.alibaba.cbu.winport.wireless.api.etl.model.offer.PriceVO$PriceView"
+          },
+          "color": "#ff2900",
+          "fontSize": "24px",
+          "class": "com.alibaba.cbu.winport.wireless.api.etl.model.offer.PriceVO",
+          "priceMoney": "86"
+        },
+        "memberId": "b2b-22014483621215395d",
+        "saleQuantity": "0"
+      },
+      {
+        "id": "687950210219",
+        "subject": "厂家现货儿童头饰皇冠公主服装配饰仙女棒宝石皇冠魔法棒头箍饰品",
+        "offerImages": [
+          {
+            "size220x220ImageURI": "img/ibank/O1CN01nxXyVV1RXSq9YM36Y_!!2201448362121-0-cib.220x220.jpg",
+            "imageURI": "img/ibank/O1CN01nxXyVV1RXSq9YM36Y_!!2201448362121-0-cib.jpg",
+            "searchImageURI": "img/ibank/O1CN01nxXyVV1RXSq9YM36Y_!!2201448362121-0-cib.search.jpg",
+            "size230x230ImageURI": "img/ibank/O1CN01nxXyVV1RXSq9YM36Y_!!2201448362121-0-cib.230x230.jpg",
+            "summImageURI": "img/ibank/O1CN01nxXyVV1RXSq9YM36Y_!!2201448362121-0-cib.summ.jpg",
+            "class": "com.alibaba.cbu.winport.wireless.service.model.OfferImage",
+            "size310x310ImageURI": "img/ibank/O1CN01nxXyVV1RXSq9YM36Y_!!2201448362121-0-cib.310x310.jpg",
+            "size120x120ImageURI": "img/ibank/O1CN01nxXyVV1RXSq9YM36Y_!!2201448362121-0-cib.120x120.jpg"
+          },
+          {
+            "size220x220ImageURI": "img/ibank/O1CN01ZUNfip1RXSlSvxPoR_!!2201448362121-0-cib.220x220.jpg",
+            "imageURI": "img/ibank/O1CN01ZUNfip1RXSlSvxPoR_!!2201448362121-0-cib.jpg",
+            "searchImageURI": "img/ibank/O1CN01ZUNfip1RXSlSvxPoR_!!2201448362121-0-cib.search.jpg",
+            "size230x230ImageURI": "img/ibank/O1CN01ZUNfip1RXSlSvxPoR_!!2201448362121-0-cib.230x230.jpg",
+            "summImageURI": "img/ibank/O1CN01ZUNfip1RXSlSvxPoR_!!2201448362121-0-cib.summ.jpg",
+            "class": "com.alibaba.cbu.winport.wireless.service.model.OfferImage",
+            "size310x310ImageURI": "img/ibank/O1CN01ZUNfip1RXSlSvxPoR_!!2201448362121-0-cib.310x310.jpg",
+            "size120x120ImageURI": "img/ibank/O1CN01ZUNfip1RXSlSvxPoR_!!2201448362121-0-cib.120x120.jpg"
+          },
+          {
+            "size220x220ImageURI": "img/ibank/O1CN01KtjUDh1RXSqCXhJkW_!!2201448362121-0-cib.220x220.jpg",
+            "imageURI": "img/ibank/O1CN01KtjUDh1RXSqCXhJkW_!!2201448362121-0-cib.jpg",
+            "searchImageURI": "img/ibank/O1CN01KtjUDh1RXSqCXhJkW_!!2201448362121-0-cib.search.jpg",
+            "size230x230ImageURI": "img/ibank/O1CN01KtjUDh1RXSqCXhJkW_!!2201448362121-0-cib.230x230.jpg",
+            "summImageURI": "img/ibank/O1CN01KtjUDh1RXSqCXhJkW_!!2201448362121-0-cib.summ.jpg",
+            "class": "com.alibaba.cbu.winport.wireless.service.model.OfferImage",
+            "size310x310ImageURI": "img/ibank/O1CN01KtjUDh1RXSqCXhJkW_!!2201448362121-0-cib.310x310.jpg",
+            "size120x120ImageURI": "img/ibank/O1CN01KtjUDh1RXSqCXhJkW_!!2201448362121-0-cib.120x120.jpg"
+          }
+        ],
+        "consignPrice": "0.95",
+        "priceSegments": [],
+        "finalPriceVo": {
+          "priceUnit": "¥",
+          "priceView": {
+            "humpLowPart": ".89",
+            "humpHighPart": "0",
+            "class": "com.alibaba.cbu.winport.wireless.api.etl.model.offer.PriceVO$PriceView"
+          },
+          "color": "#ff2900",
+          "fontSize": "24px",
+          "class": "com.alibaba.cbu.winport.wireless.api.etl.model.offer.PriceVO",
+          "priceMoney": "89"
+        },
+        "memberId": "b2b-22014483621215395d",
+        "saleQuantity": "0"
+      },
+      {
+        "id": "615134781712",
+        "subject": "儿童派对皇冠发箍发饰小女孩丝带雪花魔法棒公主批发生日蝴蝶结",
+        "offerImages": [
+          {
+            "size220x220ImageURI": "img/ibank/O1CN01qX6nCr1RXSk4a1sD7_!!2201448362121-0-cib.220x220.jpg",
+            "imageURI": "img/ibank/O1CN01qX6nCr1RXSk4a1sD7_!!2201448362121-0-cib.jpg",
+            "searchImageURI": "img/ibank/O1CN01qX6nCr1RXSk4a1sD7_!!2201448362121-0-cib.search.jpg",
+            "size230x230ImageURI": "img/ibank/O1CN01qX6nCr1RXSk4a1sD7_!!2201448362121-0-cib.230x230.jpg",
+            "summImageURI": "img/ibank/O1CN01qX6nCr1RXSk4a1sD7_!!2201448362121-0-cib.summ.jpg",
+            "class": "com.alibaba.cbu.winport.wireless.service.model.OfferImage",
+            "size310x310ImageURI": "img/ibank/O1CN01qX6nCr1RXSk4a1sD7_!!2201448362121-0-cib.310x310.jpg",
+            "size120x120ImageURI": "img/ibank/O1CN01qX6nCr1RXSk4a1sD7_!!2201448362121-0-cib.120x120.jpg"
+          },
+          {
+            "size220x220ImageURI": "img/ibank/O1CN01PrwGFf1RXT6j3hcsd_!!2201448362121-0-cib.220x220.jpg",
+            "imageURI": "img/ibank/O1CN01PrwGFf1RXT6j3hcsd_!!2201448362121-0-cib.jpg",
+            "searchImageURI": "img/ibank/O1CN01PrwGFf1RXT6j3hcsd_!!2201448362121-0-cib.search.jpg",
+            "size230x230ImageURI": "img/ibank/O1CN01PrwGFf1RXT6j3hcsd_!!2201448362121-0-cib.230x230.jpg",
+            "summImageURI": "img/ibank/O1CN01PrwGFf1RXT6j3hcsd_!!2201448362121-0-cib.summ.jpg",
+            "class": "com.alibaba.cbu.winport.wireless.service.model.OfferImage",
+            "size310x310ImageURI": "img/ibank/O1CN01PrwGFf1RXT6j3hcsd_!!2201448362121-0-cib.310x310.jpg",
+            "size120x120ImageURI": "img/ibank/O1CN01PrwGFf1RXT6j3hcsd_!!2201448362121-0-cib.120x120.jpg"
+          },
+          {
+            "size220x220ImageURI": "img/ibank/O1CN017Xt7Xd1RXSjvMFeha_!!2201448362121-0-cib.220x220.jpg",
+            "imageURI": "img/ibank/O1CN017Xt7Xd1RXSjvMFeha_!!2201448362121-0-cib.jpg",
+            "searchImageURI": "img/ibank/O1CN017Xt7Xd1RXSjvMFeha_!!2201448362121-0-cib.search.jpg",
+            "size230x230ImageURI": "img/ibank/O1CN017Xt7Xd1RXSjvMFeha_!!2201448362121-0-cib.230x230.jpg",
+            "summImageURI": "img/ibank/O1CN017Xt7Xd1RXSjvMFeha_!!2201448362121-0-cib.summ.jpg",
+            "class": "com.alibaba.cbu.winport.wireless.service.model.OfferImage",
+            "size310x310ImageURI": "img/ibank/O1CN017Xt7Xd1RXSjvMFeha_!!2201448362121-0-cib.310x310.jpg",
+            "size120x120ImageURI": "img/ibank/O1CN017Xt7Xd1RXSjvMFeha_!!2201448362121-0-cib.120x120.jpg"
+          }
+        ],
+        "consignPrice": "1.10",
+        "priceSegments": [],
+        "finalPriceVo": {
+          "priceUnit": "¥",
+          "priceView": {
+            "humpLowPart": ".94",
+            "humpHighPart": "0",
+            "class": "com.alibaba.cbu.winport.wireless.api.etl.model.offer.PriceVO$PriceView"
+          },
+          "color": "#ff2900",
+          "fontSize": "24px",
+          "class": "com.alibaba.cbu.winport.wireless.api.etl.model.offer.PriceVO",
+          "priceMoney": "94"
+        },
+        "memberId": "b2b-22014483621215395d",
+        "saleQuantity": "0"
+      },
+      {
+        "id": "873999354435",
+        "subject": "儿童头饰皇冠魔法棒套装公主女孩发箍配饰女童饰品厂家现货批发",
+        "offerImages": [
+          {
+            "size220x220ImageURI": "img/ibank/O1CN01MQMiXM1RXSlTcxzjm_!!2201448362121-0-cib.220x220.jpg",
+            "imageURI": "img/ibank/O1CN01MQMiXM1RXSlTcxzjm_!!2201448362121-0-cib.jpg",
+            "searchImageURI": "img/ibank/O1CN01MQMiXM1RXSlTcxzjm_!!2201448362121-0-cib.search.jpg",
+            "size230x230ImageURI": "img/ibank/O1CN01MQMiXM1RXSlTcxzjm_!!2201448362121-0-cib.230x230.jpg",
+            "summImageURI": "img/ibank/O1CN01MQMiXM1RXSlTcxzjm_!!2201448362121-0-cib.summ.jpg",
+            "class": "com.alibaba.cbu.winport.wireless.service.model.OfferImage",
+            "size310x310ImageURI": "img/ibank/O1CN01MQMiXM1RXSlTcxzjm_!!2201448362121-0-cib.310x310.jpg",
+            "size120x120ImageURI": "img/ibank/O1CN01MQMiXM1RXSlTcxzjm_!!2201448362121-0-cib.120x120.jpg"
+          },
+          {
+            "size220x220ImageURI": "img/ibank/O1CN01n1P3Gp1RXT9xNPPST_!!2201448362121-0-cib.220x220.jpg",
+            "imageURI": "img/ibank/O1CN01n1P3Gp1RXT9xNPPST_!!2201448362121-0-cib.jpg",
+            "searchImageURI": "img/ibank/O1CN01n1P3Gp1RXT9xNPPST_!!2201448362121-0-cib.search.jpg",
+            "size230x230ImageURI": "img/ibank/O1CN01n1P3Gp1RXT9xNPPST_!!2201448362121-0-cib.230x230.jpg",
+            "summImageURI": "img/ibank/O1CN01n1P3Gp1RXT9xNPPST_!!2201448362121-0-cib.summ.jpg",
+            "class": "com.alibaba.cbu.winport.wireless.service.model.OfferImage",
+            "size310x310ImageURI": "img/ibank/O1CN01n1P3Gp1RXT9xNPPST_!!2201448362121-0-cib.310x310.jpg",
+            "size120x120ImageURI": "img/ibank/O1CN01n1P3Gp1RXT9xNPPST_!!2201448362121-0-cib.120x120.jpg"
+          },
+          {
+            "size220x220ImageURI": "img/ibank/O1CN01xOHcGF1RXSlMGd7J6_!!2201448362121-0-cib.220x220.jpg",
+            "imageURI": "img/ibank/O1CN01xOHcGF1RXSlMGd7J6_!!2201448362121-0-cib.jpg",
+            "searchImageURI": "img/ibank/O1CN01xOHcGF1RXSlMGd7J6_!!2201448362121-0-cib.search.jpg",
+            "size230x230ImageURI": "img/ibank/O1CN01xOHcGF1RXSlMGd7J6_!!2201448362121-0-cib.230x230.jpg",
+            "summImageURI": "img/ibank/O1CN01xOHcGF1RXSlMGd7J6_!!2201448362121-0-cib.summ.jpg",
+            "class": "com.alibaba.cbu.winport.wireless.service.model.OfferImage",
+            "size310x310ImageURI": "img/ibank/O1CN01xOHcGF1RXSlMGd7J6_!!2201448362121-0-cib.310x310.jpg",
+            "size120x120ImageURI": "img/ibank/O1CN01xOHcGF1RXSlMGd7J6_!!2201448362121-0-cib.120x120.jpg"
+          }
+        ],
+        "consignPrice": "0.95",
+        "priceSegments": [],
+        "finalPriceVo": {
+          "priceUnit": "¥",
+          "priceView": {
+            "humpLowPart": ".86",
+            "humpHighPart": "0",
+            "class": "com.alibaba.cbu.winport.wireless.api.etl.model.offer.PriceVO$PriceView"
+          },
+          "color": "#ff2900",
+          "fontSize": "24px",
+          "class": "com.alibaba.cbu.winport.wireless.api.etl.model.offer.PriceVO",
+          "priceMoney": "86"
+        },
+        "memberId": "b2b-22014483621215395d",
+        "saleQuantity": "0"
+      }
+    ],
+    "offerCount": "350"
+  }
+}

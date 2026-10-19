@@ -1,0 +1,1250 @@
+{
+ "seller": {
+  "creditLevel": "16",
+  "creditLevelIcon": "//gw.alicdn.com/imgextra/i1/O1CN01VD9Iap25oweneR31D_!!6000000007574-2-tps-120-60.png",
+  "encryptUid": "RAzN8HWWdpXvAyr5aFn9AW6CRJeE2zyKNHUvQgfA3sEf2ADE1ub",
+  "evaluates": [
+   {
+    "level": "-1",
+    "levelText": "低",
+    "score": "4.6 ",
+    "title": "宝贝描述",
+    "type": "desc"
+   },
+   {
+    "level": "-1",
+    "levelText": "低",
+    "score": "4.6 ",
+    "title": "卖家服务",
+    "type": "serv"
+   },
+   {
+    "level": "-1",
+    "levelText": "低",
+    "score": "4.7 ",
+    "title": "物流服务",
+    "type": "post"
+   }
+  ],
+  "pcShopUrl": "//shop375415709.taobao.com",
+  "sellerId": "2200811463590",
+  "sellerNick": "民外旗舰店",
+  "sellerType": "B",
+  "shopIcon": "//img.alicdn.com/imgextra//fa/83/TB1Afr5VirpK1RjSZFhwu0SdXXa.png",
+  "shopId": "375415709",
+  "shopName": "民外旗舰店",
+  "startsIcon": "https://img.alicdn.com/imgextra/i2/O1CN013FxkJk1Nj8RiWyGO5_!!6000000001605-2-tps-91-14.png",
+  "userId": "2200811463590"
+ },
+ "item": {
+  "bottomIcons": [],
+  "images": [
+   "https://img.alicdn.com/imgextra/i4/2200811463590/O1CN015cbTf81cOGaBM2Jjf_!!2200811463590.jpg",
+   "https://img.alicdn.com/imgextra/i3/2200811463590/O1CN01cbof501cOGaJbCon9_!!2200811463590.jpg",
+   "https://img.alicdn.com/imgextra/i3/2200811463590/O1CN01JBi7lu1cOGaJbEpZq_!!2200811463590.jpg",
+   "https://img.alicdn.com/imgextra/i2/2200811463590/O1CN01HByccd1cOGaH06kso_!!2200811463590.jpg",
+   "https://img.alicdn.com/imgextra/i3/2200811463590/O1CN01yoDNVD1cOGaJbEYxS_!!2200811463590.jpg"
+  ],
+  "itemId": "669745626548",
+  "pcADescUrl": "//market.m.taobao.com/app/detail-project/desc/index.html?id=669745626548&descVersion=7.0&type=1&f=desc/icoss799499452961943fe7dca03ba&sellerType=B",
+  "qrCode": "https://h5.m.taobao.com/awp/core/detail.htm?id=669745626548",
+  "spuId": "8188472059",
+  "title": "液态软胶数据线三合一手机充电线器适用华为苹果一拖三iphone三合一多功能硅type-c安卓快充加长usb冲电",
+  "titleIcon": "//img.alicdn.com/tfs/TB1SMG7nnvI8KJjSspjXXcgjXXa-78-36.png?getAvatar=avatar",
+  "useWirelessDesc": "true",
+  "vagueSellCount": "400+"
+ },
+ "feature": {
+  "pcResistDetail": "false",
+  "tmwOverseasScene": "false",
+  "pcIdentityRisk": "false"
+ },
+ "plusViewVO": {
+  "askAnswerVO": {
+   "ext": {
+    "skeletonImg": "https://img.alicdn.com/imgextra/i2/O1CN01MLPxBr1flZy969k5W_!!6000000004047-2-tps-1376-1216.png"
+   },
+   "hit": "true"
+  },
+  "guessLikeVO": {
+   "hit": "true"
+  },
+  "wangwangFlowSplitVO": {
+   "hit": "true"
+  },
+  "rankVO": {
+   "hit": "true"
+  },
+  "tabPlaceholderVO": {
+   "hit": "true"
+  },
+  "industryParamVO": {
+   "basicParamList": [
+    {
+     "propertyName": "品牌",
+     "valueName": "民外"
+    },
+    {
+     "propertyName": "型号",
+     "valueName": "YT011"
+    },
+    {
+     "propertyName": "款式",
+     "valueName": "直头式"
+    },
+    {
+     "propertyName": "生产企业",
+     "valueName": "赣州子濯数码科技有限公司"
+    },
+    {
+     "propertyName": "颜色分类",
+     "valueName": "1.2m/三合一【液态硅胶】快速充电【1条装】"
+    }
+   ],
+   "enhanceParamList": [
+    {
+     "propertyName": "数据线适用范围",
+     "structPv": "false",
+     "valueName": "手机"
+    }
+   ],
+   "hit": "true"
+  },
+  "imageSearchVO": {
+   "ext": {
+    "textList": [
+     "商品已经下架啦~要不要瞧瞧别的~",
+     "该区域暂不支持购买",
+     "此商品不支持在当前地区销售",
+     "商品已经卖光啦~",
+     "当前商品仅限店铺会员购买",
+     "商品已经卖光啦，非常抱歉",
+     "店铺正在打烊中，当前商品不可下单",
+     "商品已经卖光啦～",
+     "当前库存已售完",
+     "该商品有卖家设置的购买门槛，须达门槛才可购买噢～",
+     "此商品暂时不能购买"
+    ]
+   },
+   "hit": "true",
+   "spm": "aliabtest1115297_1138353"
+  },
+  "reportEntranceVO": {
+   "hit": "true",
+   "spm": "aliabtest1097211_1051854"
+  },
+  "headAtmosphereBeltVO": {
+   "hit": "true",
+   "valid": "false"
+  },
+  "commentListVO": {
+   "ext": {
+    "countShow": "\"false\""
+   },
+   "hit": "true"
+  },
+  "pcFrontSkuQuantityLimitVO": {
+   "hit": "true"
+  },
+  "buyParamVO": {
+   "ext": {
+    "autoApplCoupSource": "pcDetailOrder",
+    "needAutoApplCoup": "true"
+   },
+   "hit": "true"
+  }
+ },
+ "skuCore": {
+  "sku2info": {
+   "0": {
+    "asac": "1A19125MRBETHWLWVLUXSD",
+    "logisticsTime": "平均10小时发货",
+    "moreQuantity": "true",
+    "price": {
+     "priceColorNew": "#FFFFFF",
+     "priceMoney": "501",
+     "priceText": "5.01",
+     "priceTitle": "优惠前"
+    },
+    "quantity": "200",
+    "quantityDisplayValue": "1",
+    "quantityText": "有货",
+    "subPrice": {
+     "priceBgColor": "#FF5000",
+     "priceColor": "#FFFFFF",
+     "priceColorNew": "#FFFFFF",
+     "priceMoney": "401",
+     "priceText": "4.01",
+     "priceTitle": "平台加补后",
+     "priceTitleColor": "#FFFFFF"
+    }
+   },
+   "5743745873022": {
+    "asac": "1A19125MRBETHWLWVLUXSD",
+    "cartParam": {
+     "addCartCheck": "true"
+    },
+    "logisticsTime": "平均10小时发货",
+    "moreQuantity": "true",
+    "price": {
+     "priceColorNew": "#FFFFFF",
+     "priceMoney": "501",
+     "priceText": "5.01",
+     "priceTitle": "优惠前"
+    },
+    "quantity": "200",
+    "quantityDisplayValue": "1",
+    "quantityText": "有货",
+    "subPrice": {
+     "priceBgColor": "#FF5000",
+     "priceColor": "#FFFFFF",
+     "priceColorNew": "#FFFFFF",
+     "priceMoney": "401",
+     "priceText": "4.01",
+     "priceTitle": "平台加补后",
+     "priceTitleColor": "#FFFFFF"
+    }
+   }
+  },
+  "skuItem": {
+   "itemStatus": "0",
+   "renderSku": "true",
+   "unitBuy": "1"
+  }
+ },
+ "services": {
+  "allServices": [
+   {
+    "autoSelect": "false",
+    "desc": "（三包故障， 延长保障）",
+    "extraDisplayName": "三包故障， 延长保障",
+    "groupName": "保障服务",
+    "isvService": "false",
+    "mustSelect": "false",
+    "name": "延长保修",
+    "serviceCode": "PINGTAIYANZHANGBAOXIU923A",
+    "serviceId": "747728399078",
+    "serviceTypeRec": "false",
+    "standardPresentationV2": "true",
+    "uniqueServices": [
+     {
+      "attributeStr": "",
+      "autoSelect": "false",
+      "name": "一年",
+      "uniqueId": "5153246568063"
+     },
+     {
+      "attributeStr": "",
+      "autoSelect": "false",
+      "name": "二年",
+      "uniqueId": "5153246568067"
+     },
+     {
+      "attributeStr": "",
+      "autoSelect": "false",
+      "name": "三年",
+      "uniqueId": "5153246568065"
+     }
+    ]
+   },
+   {
+    "autoSelect": "false",
+    "desc": "（性能/意外故障，全面保障）",
+    "extraDisplayName": "性能/意外故障，全面保障",
+    "groupName": "保障服务",
+    "isvService": "false",
+    "mustSelect": "false",
+    "name": "全面保修",
+    "serviceCode": "PINGTAIQUANMIANBAOXIU846A",
+    "serviceId": "733008383026",
+    "serviceTypeRec": "false",
+    "standardPresentationV2": "true",
+    "uniqueServices": [
+     {
+      "attributeStr": "",
+      "autoSelect": "false",
+      "name": "二年",
+      "uniqueId": "5069832464498"
+     },
+     {
+      "attributeStr": "",
+      "autoSelect": "false",
+      "name": "三年",
+      "uniqueId": "5069832464496"
+     }
+    ]
+   }
+  ],
+  "multiSelect": "true",
+  "mustSelect": "false",
+  "name": "特色服务",
+  "sku2StandardServiceV2": {
+   "0": {
+    "733008383026:5069832464498": {
+     "autoSelect": "false",
+     "cells": "false",
+     "extraServiceInfo": "二年",
+     "extraTagText": "推荐",
+     "free": "false",
+     "price": "1100",
+     "priceText": "11",
+     "serviceId": "733008383026",
+     "serviceTypeRec": "false",
+     "uniqueId": "5069832464498"
+    },
+    "747728399078:5153246568063": {
+     "autoSelect": "false",
+     "cells": "false",
+     "extraServiceInfo": "一年",
+     "extraTagText": "推荐",
+     "free": "false",
+     "price": "600",
+     "priceText": "6",
+     "serviceId": "747728399078",
+     "serviceTypeRec": "false",
+     "uniqueId": "5153246568063"
+    },
+    "733008383026:5069832464496": {
+     "autoSelect": "false",
+     "cells": "false",
+     "desc": "（怎么坏都不怕）",
+     "extraDisplayName": "怎么坏都不怕",
+     "extraServiceInfo": "三年(怎么坏都不怕)",
+     "extraTagText": "推荐",
+     "free": "false",
+     "price": "1200",
+     "priceText": "12",
+     "serviceId": "733008383026",
+     "serviceTypeRec": "false",
+     "uniqueId": "5069832464496"
+    },
+    "747728399078:5153246568065": {
+     "autoSelect": "false",
+     "cells": "false",
+     "desc": "（热销服务）",
+     "extraDisplayName": "热销服务",
+     "extraServiceInfo": "三年(热销服务)",
+     "extraTagText": "推荐",
+     "free": "false",
+     "price": "1000",
+     "priceText": "10",
+     "serviceId": "747728399078",
+     "serviceTypeRec": "false",
+     "uniqueId": "5153246568065"
+    },
+    "747728399078:5153246568067": {
+     "autoSelect": "false",
+     "cells": "false",
+     "extraServiceInfo": "二年",
+     "extraTagText": "推荐",
+     "free": "false",
+     "price": "900",
+     "priceText": "9",
+     "serviceId": "747728399078",
+     "serviceTypeRec": "false",
+     "uniqueId": "5153246568067"
+    }
+   },
+   "5743745873022": {
+    "733008383026:5069832464498": {
+     "autoSelect": "false",
+     "cells": "false",
+     "extraServiceInfo": "二年",
+     "extraTagText": "推荐",
+     "free": "false",
+     "price": "1100",
+     "priceText": "11",
+     "serviceId": "733008383026",
+     "serviceTypeRec": "false",
+     "uniqueId": "5069832464498"
+    },
+    "747728399078:5153246568063": {
+     "autoSelect": "false",
+     "cells": "false",
+     "extraServiceInfo": "一年",
+     "extraTagText": "推荐",
+     "free": "false",
+     "price": "600",
+     "priceText": "6",
+     "serviceId": "747728399078",
+     "serviceTypeRec": "false",
+     "uniqueId": "5153246568063"
+    },
+    "733008383026:5069832464496": {
+     "autoSelect": "false",
+     "cells": "false",
+     "desc": "（怎么坏都不怕）",
+     "extraDisplayName": "怎么坏都不怕",
+     "extraServiceInfo": "三年(怎么坏都不怕)",
+     "extraTagText": "推荐",
+     "free": "false",
+     "price": "1200",
+     "priceText": "12",
+     "serviceId": "733008383026",
+     "serviceTypeRec": "false",
+     "uniqueId": "5069832464496"
+    },
+    "747728399078:5153246568065": {
+     "autoSelect": "false",
+     "cells": "false",
+     "desc": "（热销服务）",
+     "extraDisplayName": "热销服务",
+     "extraServiceInfo": "三年(热销服务)",
+     "extraTagText": "推荐",
+     "free": "false",
+     "price": "1000",
+     "priceText": "10",
+     "serviceId": "747728399078",
+     "serviceTypeRec": "false",
+     "uniqueId": "5153246568065"
+    },
+    "747728399078:5153246568067": {
+     "autoSelect": "false",
+     "cells": "false",
+     "extraServiceInfo": "二年",
+     "extraTagText": "推荐",
+     "free": "false",
+     "price": "900",
+     "priceText": "9",
+     "serviceId": "747728399078",
+     "serviceTypeRec": "false",
+     "uniqueId": "5153246568067"
+    }
+   }
+  },
+  "sku2serviceMap": {
+   "0": [
+    {
+     "serviceId": "747728399078",
+     "serviceSkuPrices": [
+      {
+       "autoSelect": "false",
+       "extraServiceInfo": "一年",
+       "extraTagText": "推荐",
+       "free": "false",
+       "lineThroughPrice": "600",
+       "lineThroughPriceText": "6",
+       "price": "600",
+       "priceText": "6",
+       "serviceTypeRec": "false",
+       "skuId": "5743745873022",
+       "uniqueId": "5153246568063"
+      },
+      {
+       "autoSelect": "false",
+       "desc": "（热销服务）",
+       "extraDisplayName": "热销服务",
+       "extraServiceInfo": "三年(热销服务)",
+       "extraTagText": "推荐",
+       "free": "false",
+       "lineThroughPrice": "1000",
+       "lineThroughPriceText": "10",
+       "price": "1000",
+       "priceText": "10",
+       "serviceTypeRec": "false",
+       "skuId": "5743745873022",
+       "uniqueId": "5153246568065"
+      },
+      {
+       "autoSelect": "false",
+       "extraServiceInfo": "二年",
+       "extraTagText": "推荐",
+       "free": "false",
+       "lineThroughPrice": "900",
+       "lineThroughPriceText": "9",
+       "price": "900",
+       "priceText": "9",
+       "serviceTypeRec": "false",
+       "skuId": "5743745873022",
+       "uniqueId": "5153246568067"
+      }
+     ],
+     "serviceTypeRec": "false",
+     "standardPresentationV2": "true"
+    },
+    {
+     "serviceId": "733008383026",
+     "serviceSkuPrices": [
+      {
+       "autoSelect": "false",
+       "desc": "（怎么坏都不怕）",
+       "extraDisplayName": "怎么坏都不怕",
+       "extraServiceInfo": "三年(怎么坏都不怕)",
+       "extraTagText": "推荐",
+       "free": "false",
+       "lineThroughPrice": "1200",
+       "lineThroughPriceText": "12",
+       "price": "1200",
+       "priceText": "12",
+       "serviceTypeRec": "false",
+       "skuId": "5743745873022",
+       "uniqueId": "5069832464496"
+      },
+      {
+       "autoSelect": "false",
+       "extraServiceInfo": "二年",
+       "extraTagText": "推荐",
+       "free": "false",
+       "lineThroughPrice": "1100",
+       "lineThroughPriceText": "11",
+       "price": "1100",
+       "priceText": "11",
+       "serviceTypeRec": "false",
+       "skuId": "5743745873022",
+       "uniqueId": "5069832464498"
+      }
+     ],
+     "serviceTypeRec": "false",
+     "standardPresentationV2": "true"
+    }
+   ],
+   "5743745873022": [
+    {
+     "serviceId": "747728399078",
+     "serviceSkuPrices": [
+      {
+       "autoSelect": "false",
+       "extraServiceInfo": "一年",
+       "extraTagText": "推荐",
+       "free": "false",
+       "lineThroughPrice": "600",
+       "lineThroughPriceText": "6",
+       "price": "600",
+       "priceText": "6",
+       "serviceTypeRec": "false",
+       "skuId": "5743745873022",
+       "uniqueId": "5153246568063"
+      },
+      {
+       "autoSelect": "false",
+       "desc": "（热销服务）",
+       "extraDisplayName": "热销服务",
+       "extraServiceInfo": "三年(热销服务)",
+       "extraTagText": "推荐",
+       "free": "false",
+       "lineThroughPrice": "1000",
+       "lineThroughPriceText": "10",
+       "price": "1000",
+       "priceText": "10",
+       "serviceTypeRec": "false",
+       "skuId": "5743745873022",
+       "uniqueId": "5153246568065"
+      },
+      {
+       "autoSelect": "false",
+       "extraServiceInfo": "二年",
+       "extraTagText": "推荐",
+       "free": "false",
+       "lineThroughPrice": "900",
+       "lineThroughPriceText": "9",
+       "price": "900",
+       "priceText": "9",
+       "serviceTypeRec": "false",
+       "skuId": "5743745873022",
+       "uniqueId": "5153246568067"
+      }
+     ],
+     "serviceTypeRec": "false",
+     "standardPresentationV2": "true"
+    },
+    {
+     "serviceId": "733008383026",
+     "serviceSkuPrices": [
+      {
+       "autoSelect": "false",
+       "desc": "（怎么坏都不怕）",
+       "extraDisplayName": "怎么坏都不怕",
+       "extraServiceInfo": "三年(怎么坏都不怕)",
+       "extraTagText": "推荐",
+       "free": "false",
+       "lineThroughPrice": "1200",
+       "lineThroughPriceText": "12",
+       "price": "1200",
+       "priceText": "12",
+       "serviceTypeRec": "false",
+       "skuId": "5743745873022",
+       "uniqueId": "5069832464496"
+      },
+      {
+       "autoSelect": "false",
+       "extraServiceInfo": "二年",
+       "extraTagText": "推荐",
+       "free": "false",
+       "lineThroughPrice": "1100",
+       "lineThroughPriceText": "11",
+       "price": "1100",
+       "priceText": "11",
+       "serviceTypeRec": "false",
+       "skuId": "5743745873022",
+       "uniqueId": "5069832464498"
+      }
+     ],
+     "serviceTypeRec": "false",
+     "standardPresentationV2": "true"
+    }
+   ]
+  },
+  "standardServiceV2": [
+   {
+    "items": [
+     {
+      "autoSelect": "false",
+      "desc": "（三包故障， 延长保障）",
+      "extraDisplayName": "三包故障， 延长保障",
+      "groupName": "保障服务",
+      "isvService": "false",
+      "mustSelect": "false",
+      "name": "延长保修",
+      "serviceCode": "PINGTAIYANZHANGBAOXIU923A",
+      "serviceId": "747728399078",
+      "serviceTypeRec": "false",
+      "standardPresentationV2": "true",
+      "uniqueServices": [
+       {
+        "attributeStr": "",
+        "autoSelect": "false",
+        "name": "一年",
+        "uniqueId": "5153246568063"
+       },
+       {
+        "attributeStr": "",
+        "autoSelect": "false",
+        "name": "二年",
+        "uniqueId": "5153246568067"
+       },
+       {
+        "attributeStr": "",
+        "autoSelect": "false",
+        "name": "三年",
+        "uniqueId": "5153246568065"
+       }
+      ]
+     },
+     {
+      "autoSelect": "false",
+      "desc": "（性能/意外故障，全面保障）",
+      "extraDisplayName": "性能/意外故障，全面保障",
+      "groupName": "保障服务",
+      "isvService": "false",
+      "mustSelect": "false",
+      "name": "全面保修",
+      "serviceCode": "PINGTAIQUANMIANBAOXIU846A",
+      "serviceId": "733008383026",
+      "serviceTypeRec": "false",
+      "standardPresentationV2": "true",
+      "uniqueServices": [
+       {
+        "attributeStr": "",
+        "autoSelect": "false",
+        "name": "二年",
+        "uniqueId": "5069832464498"
+       },
+       {
+        "attributeStr": "",
+        "autoSelect": "false",
+        "name": "三年",
+        "uniqueId": "5069832464496"
+       }
+      ]
+     }
+    ],
+    "title": "保障服务"
+   }
+  ]
+ },
+ "params": {
+  "aplusParams": "[]",
+  "safeParams": {},
+  "trackParams": {
+   "detailabtestdetail": ""
+  }
+ },
+ "skuBase": {
+  "components": [],
+  "props": [
+   {
+    "bigImageMode": "true",
+    "comboProperty": "false",
+    "hasGroupTags": "false",
+    "hasImage": "true",
+    "name": "颜色分类",
+    "nameDesc": "（1）",
+    "packProp": "false",
+    "pid": "1627207",
+    "shouldGroup": "false",
+    "showSizeRecommend": "false",
+    "values": [
+     {
+      "comboPropertyValue": "false",
+      "corner": {
+       "cornerBackgroundColor": "#ff5000",
+       "cornerBorderColor": "#FFFFFF",
+       "cornerPVPath": "1627207:35558819414",
+       "cornerText": "百人购买",
+       "cornerTextColor": "#FFFFFF",
+       "skuCornerIcon": ""
+      },
+      "image": "https://gw.alicdn.com/bao/uploaded/i2/2200811463590/O1CN01XxHIRy1cOGbAsSFX0_!!2200811463590.png",
+      "name": "1.2m/三合一【液态硅胶】快速充电【1条装】",
+      "vid": "35558819414"
+     }
+    ]
+   }
+  ],
+  "skus": [
+   {
+    "propPath": "1627207:35558819414",
+    "skuId": "5743745873022"
+   }
+  ]
+ },
+ "plusViewFieldMappingVO": {
+  "headAtmosphere": [
+   {
+    "headAtmosphereBeltVO": {
+     "hit": "true",
+     "valid": "false"
+    }
+   }
+  ]
+ },
+ "pcTrade": {
+  "redirectReason": "bSeller",
+  "redirectUrl": "https://detail.tmall.com/item.htm?id=669745626548"
+ },
+ "componentsVO": {
+  "headImageVO": {
+   "images": [
+    "https://img.alicdn.com/imgextra/i1/2200811463590/O1CN01AzHQap1cOGcG4fHlQ_!!0-item_pic.jpg",
+    "https://img.alicdn.com/imgextra/i3/2200811463590/O1CN01cbof501cOGaJbCon9_!!2200811463590.jpg",
+    "https://img.alicdn.com/imgextra/i3/2200811463590/O1CN01JBi7lu1cOGaJbEpZq_!!2200811463590.jpg",
+    "https://img.alicdn.com/imgextra/i2/2200811463590/O1CN01HByccd1cOGaH06kso_!!2200811463590.jpg",
+    "https://img.alicdn.com/imgextra/i3/2200811463590/O1CN01yoDNVD1cOGaJbEYxS_!!2200811463590.jpg"
+   ],
+   "videos": []
+  },
+  "headerVO": {
+   "buttons": [
+    {
+     "background": {
+      "alpha": "1.0",
+      "disabledAlpha": "1.0"
+     },
+     "disabled": "false",
+     "events": [
+      {
+       "fields": {
+        "url": "//s.taobao.com/search"
+       },
+       "type": "onClick"
+      }
+     ],
+     "subTitle": {},
+     "title": {
+      "text": "搜索"
+     },
+     "type": "search_in_taobao"
+    },
+    {
+     "background": {
+      "alpha": "1.0",
+      "disabledAlpha": "1.0"
+     },
+     "disabled": "false",
+     "events": [
+      {
+       "fields": {
+        "url": "//shop375415709.taobao.com/search.htm"
+       },
+       "type": "onClick"
+      }
+     ],
+     "subTitle": {},
+     "title": {
+      "text": "搜本店"
+     },
+     "type": "search_in_store"
+    }
+   ],
+   "logoJumpUrl": "https://www.tmall.com",
+   "mallLogo": "https://img.alicdn.com/imgextra/i2/O1CN01a69z6z1hJklCkBqOU_!!6000000004257-2-tps-174-106.png",
+   "searchText": "搜索宝贝"
+  },
+  "storeCardVO": {
+   "buttons": [
+    {
+     "disabled": "false",
+     "image": {
+      "gifAnimated": "false",
+      "imageUrl": "https://img.alicdn.com/imgextra/i1/O1CN016DNujx1yMMj6NMXVv_!!6000000006564-55-tps-24-24.svg"
+     },
+     "title": {
+      "text": "客服"
+     },
+     "type": "customer_service"
+    },
+    {
+     "disabled": "false",
+     "events": [
+      {
+       "fields": {
+        "url": "https://shop375415709.taobao.com/category.htm"
+       },
+       "type": "openUrl"
+      }
+     ],
+     "image": {
+      "gifAnimated": "false",
+      "imageUrl": "https://img.alicdn.com/imgextra/i4/O1CN01jn67ow1ZhYeiTJlZn_!!6000000003226-55-tps-24-24.svg"
+     },
+     "title": {
+      "text": "进店"
+     },
+     "type": "enter_shop"
+    }
+   ],
+   "creditLevel": "16",
+   "creditLevelIcon": "//gw.alicdn.com/imgextra/i1/O1CN01VD9Iap25oweneR31D_!!6000000007574-2-tps-120-60.png",
+   "evaluates": [
+    {
+     "score": "4.5",
+     "title": "宝贝质量"
+    },
+    {
+     "score": "4.5",
+     "title": "物流速度"
+    },
+    {
+     "score": "4.5",
+     "title": "服务保障"
+    }
+   ],
+   "labelList": [
+    {
+     "contentDesc": "88VIP好评率91%"
+    },
+    {
+     "contentDesc": "平均9小时发货"
+    },
+    {
+     "contentDesc": "平均12小时退款"
+    }
+   ],
+   "overallScore": "4.5",
+   "sellerType": "B",
+   "shopIcon": "//img.alicdn.com/imgextra//fa/83/TB1Afr5VirpK1RjSZFhwu0SdXXa.png",
+   "shopName": "民外旗舰店",
+   "shopUrl": "https://shop375415709.taobao.com/category.htm",
+   "starNum": "4.5",
+   "startsIcon": "https://img.alicdn.com/imgextra/i2/O1CN013FxkJk1Nj8RiWyGO5_!!6000000001605-2-tps-91-14.png"
+  },
+  "titleVO": {
+   "salesDesc": "已售 400+",
+   "subTitles": [
+    {
+     "title": "可开发票"
+    }
+   ],
+   "title": {
+    "title": "液态软胶数据线三合一手机充电线器适用华为苹果一拖三iphone三合一多功能硅type-c安卓快充加长usb冲电"
+   }
+  },
+  "debugVO": {
+   "host": "taodetail011227096236.center.na620@11.227.96.236",
+   "traceId": "2150460617905599747147579e0ff8"
+  },
+  "umpPriceLogVO": {
+   "bcType": "b",
+   "bs": "businessScenario",
+   "dumpInvoke": "0",
+   "map": "{}",
+   "sellerId": "2200811463590",
+   "sid": "0",
+   "traceId": "2150460617905599747147579e0ff8",
+   "type": "99",
+   "umpCreateTime": "2026-09-28 09:46:14",
+   "version": "2.1",
+   "xobjectId": "669745626548"
+  },
+  "deliveryVO": {
+   "addressId": "9099245966",
+   "agingDesc": "平均10小时发货",
+   "agingDescColor": "#00A67C",
+   "areaId": "411327",
+   "deliverToCity": "南阳市",
+   "deliveryFromAddr": "广东深圳",
+   "deliveryToAddr": "南阳市 社旗县 唐庄乡",
+   "deliveryToDistrict": "社旗县",
+   "freight": "快递: 免运费"
+  },
+  "o2oVo": {
+   "enableJzLocalizationProduct": "false"
+  },
+  "itemEndorseVO": {
+   "endorseList": [
+    {
+     "textList": [
+      "多人评价\"使用体验很好\""
+     ],
+     "type": "itemRate"
+    }
+   ]
+  },
+  "bottomBarVO": {
+   "buyInMobile": "false",
+   "leftButtons": [
+    {
+     "background": {
+      "alpha": "1.0",
+      "disabledAlpha": "1.0",
+      "disabledColor": [
+       "#ffcb00",
+       "#ff9402"
+      ],
+      "gradientColor": [
+       "#ffcb00",
+       "#ff9402"
+      ]
+     },
+     "disabled": "false",
+     "title": {
+      "alpha": "1.0",
+      "bold": "true",
+      "color": "#ffffff",
+      "disabledAlpha": "0.2",
+      "disabledColor": "#33ffffff",
+      "fontSize": "16",
+      "text": "加入购物车"
+     },
+     "type": "add_cart"
+    },
+    {
+     "background": {
+      "alpha": "1.0",
+      "disabledAlpha": "1.0",
+      "disabledColor": [
+       "#ff7700",
+       "#ff4900"
+      ],
+      "gradientColor": [
+       "#ff7700",
+       "#ff4900"
+      ]
+     },
+     "disabled": "false",
+     "title": {
+      "alpha": "1.0",
+      "bold": "true",
+      "color": "#ffffff",
+      "disabledAlpha": "0.2",
+      "disabledColor": "#80ffffff",
+      "fontSize": "16",
+      "text": "领券购买"
+     },
+     "type": "buy_now"
+    }
+   ],
+   "rightButtons": [
+    {
+     "disabled": "false",
+     "icon": {
+      "alpha": "1.0",
+      "color": "#666666",
+      "disabledAlpha": "1.0",
+      "disabledColor": "#dddddd",
+      "iconFontName": "뀚",
+      "size": "14"
+     },
+     "title": {
+      "alpha": "1.0",
+      "bold": "false",
+      "color": "#666666",
+      "disabledAlpha": "1.0",
+      "disabledColor": "#666666",
+      "fontSize": "14",
+      "text": "收藏"
+     },
+     "type": "collect"
+    }
+   ]
+  },
+  "extensionInfoVO": {
+   "infos": [
+    {
+     "hitCanBeEnjoyedAgainAbTest": "true",
+     "items": [
+      {
+       "detail4Text": [
+        {
+         "bold": "false",
+         "iconFont": "XIN_XIANG",
+         "type": "ICON_FONT"
+        },
+        {
+         "bold": "false",
+         "text": "店铺新客减1元",
+         "type": "TEXT"
+        }
+       ],
+       "text": [
+        "店铺新客减1元"
+       ]
+      }
+     ],
+     "title": "优惠",
+     "type": "DAILY_COUPON"
+    },
+    {
+     "items": [
+      {
+       "text": [
+        "7天无理由退换",
+        "假一赔四",
+        "极速退款"
+       ]
+      }
+     ],
+     "title": "保障",
+     "type": "GUARANTEE"
+    },
+    {
+     "items": [
+      {
+       "text": [
+        "民外"
+       ],
+       "title": "品牌"
+      },
+      {
+       "text": [
+        "YT011"
+       ],
+       "title": "型号"
+      },
+      {
+       "text": [
+        "直头式"
+       ],
+       "title": "款式"
+      },
+      {
+       "text": [
+        "赣州子濯数码科技有限公司"
+       ],
+       "title": "生产企业"
+      },
+      {
+       "text": [
+        "手机"
+       ],
+       "title": "数据线适用范围"
+      },
+      {
+       "text": [
+        "1.2m/三合一【液态硅胶】快速充电【1条装】"
+       ],
+       "title": "颜色分类"
+      }
+     ],
+     "title": "参数",
+     "type": "BASE_PROPS"
+    },
+    {
+     "items": [
+      {
+       "icon": "https://gw.alicdn.com/imgextra/i3/O1CN018OeEm11qBoiyKY6F6_!!6000000005458-2-tps-88-88.png",
+       "text": [
+        "满足相应条件（激活或使用后不支持）时，消费者可申请 “7天无理由退换货”"
+       ],
+       "title": "7天无理由退换"
+      },
+      {
+       "action": "查看",
+       "actionLink": "https://huodong.taobao.com/wow/z/zebra/rules/jiayipeisi",
+       "icon": "https://gw.alicdn.com/imgextra/i2/O1CN01rGRSdc27ieaMPmbtb_!!6000000007831-2-tps-88-88.png",
+       "text": [
+        "若消费者收到商品非“正品”，商家需额外向消费者支付商品实际成交金额的四倍作为赔偿"
+       ],
+       "title": "假一赔四"
+      },
+      {
+       "icon": "https://gw.alicdn.com/imgextra/i3/O1CN017M9n9g24KtBtclhMh_!!6000000007373-2-tps-88-88.png",
+       "text": [
+        "满足相应条件时，信誉良好的用户在退货寄出后，享受极速退款到账。"
+       ],
+       "title": "极速退款"
+      }
+     ],
+     "title": "保障",
+     "type": "GUARANTEE_NEW"
+    }
+   ]
+  },
+  "promotionBannerVO": {
+   "promotionBannerVOList": [
+    {
+     "bgColor": "#FF5000",
+     "price": "1",
+     "priceColor": "#FFFFFF",
+     "promotionSubTitle": "即时可用",
+     "promotionSubTitleColor": "#FFFFFF",
+     "promotionTitle": "首单礼金店铺新客专享",
+     "promotionTitleColor": "#FFFFFF",
+     "type": "21"
+    }
+   ]
+  },
+  "rightBarVO": {
+   "buyerButtons": [
+    {
+     "disabled": "false",
+     "href": "https://survey.taobao.com/apps/zhiliao/GUShqv-xp",
+     "icon": "https://gw.alicdn.com/imgextra/i3/O1CN01js47DP1J3DxYBQG4g_!!6000000000972-1-tps-56-56.gif",
+     "label": "用户调研",
+     "priority": "201",
+     "type": "survey"
+    },
+    {
+     "disabled": "false",
+     "icon": "https://img.alicdn.com/imgextra/i2/O1CN012pqGiT1gp4XhKkkRs_!!6000000004190-2-tps-96-96.png",
+     "label": "联系客服",
+     "priority": "200",
+     "type": "webww2"
+    },
+    {
+     "disabled": "false",
+     "href": "//cart.taobao.com",
+     "icon": "https://img.alicdn.com/imgextra/i4/O1CN01FOK30u1SymJbsQUtk_!!6000000002316-2-tps-96-96.png",
+     "label": "购物车",
+     "priority": "199",
+     "type": "cart2"
+    },
+    {
+     "disabled": "false",
+     "href": "https://h5.m.taobao.com/awp/core/detail.htm?id=669745626548",
+     "icon": "https://img.alicdn.com/imgextra/i3/O1CN01CkZbKp27arsx4ktdK_!!6000000007814-2-tps-96-96.png",
+     "label": "商品码",
+     "priority": "198",
+     "type": "qrcode"
+    },
+    {
+     "disabled": "false",
+     "href": "https://pc.taobao.com?channel=item",
+     "icon": "https://gw.alicdn.com/imgextra/i4/O1CN0165n4Cr1CGK2faBVbj_!!6000000000053-1-tps-56-56.gif",
+     "label": "桌面版",
+     "priority": "197",
+     "type": "plugin"
+    },
+    {
+     "disabled": "false",
+     "icon": "https://img.alicdn.com/imgextra/i1/O1CN01Go6lqn28DnZ3MlmFE_!!6000000007899-2-tps-96-96.png",
+     "label": "复制链接",
+     "priority": "196",
+     "type": "copyUrl"
+    },
+    {
+     "disabled": "false",
+     "icon": "https://img.alicdn.com/imgextra/i1/O1CN01at70Km26oJu1Kk0vt_!!6000000007708-2-tps-96-96.png",
+     "priority": "195",
+     "type": "feedback"
+    },
+    {
+     "disabled": "false",
+     "href": "//jubao.taobao.com/index.htm?itemId=669745626548&spm=a1z6q.7847058",
+     "icon": "https://img.alicdn.com/imgextra/i2/O1CN01RAWBfz20zsCKuENux_!!6000000006921-2-tps-96-96.png",
+     "label": "举报",
+     "priority": "99",
+     "type": "report"
+    },
+    {
+     "disabled": "false",
+     "priority": "1",
+     "type": "backTop"
+    }
+   ],
+   "sellerButtons": []
+  },
+  "payVO": {
+   "payConfigList": [
+    {
+     "text": "信用卡支付"
+    }
+   ]
+  },
+  "priceVO": {
+   "extraPrice": {
+    "hiddenPrice": "false",
+    "priceBgColor": "#FF5000",
+    "priceColor": "#FFFFFF",
+    "priceColorNew": "#FFFFFF",
+    "priceMoney": "401",
+    "priceText": "4.01",
+    "priceTitle": "平台加补后",
+    "priceTitleColor": "#FFFFFF",
+    "priceUnit": "￥"
+   },
+   "isNewStyle": "true",
+   "mainBelt": {
+    "beltStyleType": "2",
+    "logo": "https://img.alicdn.com/imgextra/i4/O1CN01vimFtB1kgblU7DaqJ_!!6000000004713-2-tps-71-36.png",
+    "priceBeltImg": "https://gw.alicdn.com/imgextra/i4/O1CN01611wlp1QkSa60ey3l_!!6000000002014-2-tps-1500-256.png",
+    "rightBelt": {
+     "countdown": "false",
+     "extraTextColor": "#FFFFFF",
+     "textColor": "#FFFFFF"
+    }
+   },
+   "price": {
+    "hiddenPrice": "false",
+    "priceColor": "#FF4F00",
+    "priceColorNew": "#FFFFFF",
+    "priceMoney": "501",
+    "priceText": "5.01",
+    "priceTitle": "优惠前",
+    "priceTitleColor": "#FF4F00",
+    "priceUnit": "￥"
+   }
+  },
+  "webfontVO": {
+   "enableWebfont": "false"
+  },
+  "tabVO": {
+   "tabList": [
+    {
+     "icon": "https://img.alicdn.com/imgextra/i1/O1CN016DNujx1yMMj6NMXVv_!!6000000006564-55-tps-24-24.svg",
+     "name": "comments",
+     "sort": "1",
+     "title": "用户评价"
+    },
+    {
+     "icon": "https://img.alicdn.com/imgextra/i1/O1CN016DNujx1yMMj6NMXVv_!!6000000006564-55-tps-24-24.svg",
+     "name": "base_drops",
+     "sort": "200",
+     "title": "参数信息"
+    },
+    {
+     "name": "factory_qualification",
+     "sort": "500",
+     "title": "验厂资质"
+    },
+    {
+     "icon": "https://img.alicdn.com/imgextra/i1/O1CN016DNujx1yMMj6NMXVv_!!6000000006564-55-tps-24-24.svg",
+     "name": "desc",
+     "sort": "600",
+     "title": "图文详情"
+    },
+    {
+     "icon": "https://img.alicdn.com/imgextra/i1/O1CN016DNujx1yMMj6NMXVv_!!6000000006564-55-tps-24-24.svg",
+     "name": "recommends",
+     "sort": "700",
+     "title": "本店推荐"
+    },
+    {
+     "name": "guessULike",
+     "sort": "900",
+     "title": "看了又看"
+    }
+   ]
+  }
+ }
+}

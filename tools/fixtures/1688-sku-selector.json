@@ -1,0 +1,427 @@
+{
+  "debugContext": {},
+  "skuSelectorBizModel": {
+    "extraInfo": {
+      "addCartInfo": {
+        "activityUrl": ""
+      },
+      "needSkuHide": false,
+      "freightInfo": {
+        "unitWeight": 0,
+        "freeEndAmount": -1,
+        "receiveAddress": "河南省南阳市",
+        "hideDeliveryTime": false,
+        "skuFeatures": {
+          "6157035487298": {
+            "cbu_hot_type": "skuprice_v1",
+            "cbu_hot_sale_type": "热销款"
+          }
+        },
+        "officialLogistics": false,
+        "sellerUserId": 2220383608474,
+        "sendDivisionCode": "330782",
+        "buyerProtectionScene": "fenxiao",
+        "templateId": 493243339,
+        "receiveAddressCode": "411327",
+        "queryFlag": true,
+        "sendAddressCode": "855428128",
+        "offerId": 1001672530707,
+        "skuWeight": {
+          "6157035487298": 0.5,
+          "6157035487299": 0.5
+        }
+      }
+    },
+    "onePieceFreePostage": false,
+    "orderFlow": "fenxiaonew",
+    "originalSkuInfoMap": {
+      "【8格】CD支架": {
+        "canBookCount": 29882,
+        "discountPrice": "4.00",
+        "price": "4.00",
+        "priceAmount": 2,
+        "promotionSku": false,
+        "saleCount": 0,
+        "skuId": 6157035487299,
+        "specAttrs": "【8格】CD支架",
+        "specId": "c36eacc1f421522a1c20d884eb2c6811"
+      },
+      "【6格】CD支架": {
+        "canBookCount": 29861,
+        "discountPrice": "3.00",
+        "price": "3.00",
+        "priceAmount": 2,
+        "promotionSku": false,
+        "saleCount": 0,
+        "skuId": 6157035487298,
+        "specAttrs": "【6格】CD支架",
+        "specId": "81322de18456c14a4683af5f1e27d3fc"
+      }
+    },
+    "skuInfoMap": {
+      "【8格】CD支架": {
+        "canBookCount": 29882,
+        "discountPrice": "4.00",
+        "price": "4.00",
+        "priceAmount": 2,
+        "promotionSku": false,
+        "saleCount": 0,
+        "skuId": 6157035487299,
+        "specAttrs": "【8格】CD支架",
+        "specId": "c36eacc1f421522a1c20d884eb2c6811"
+      },
+      "【6格】CD支架": {
+        "canBookCount": 29861,
+        "discountPrice": "3.00",
+        "price": "3.00",
+        "priceAmount": 2,
+        "promotionSku": false,
+        "saleCount": 0,
+        "skuId": 6157035487298,
+        "specAttrs": "【6格】CD支架",
+        "specId": "81322de18456c14a4683af5f1e27d3fc"
+      }
+    },
+    "skuPriceScale": "￥3.00-￥4.00",
+    "skuPriceType": "skuPrice",
+    "skuProps": [
+      {
+        "fid": 3216,
+        "prop": "颜色",
+        "value": [
+          {
+            "imageUrl": "https://cbu01.alicdn.com/img/ibank/O1CN01CTBKZQ2CT9N7Gxn0o_!!2220383608474-0-cib.jpg",
+            "name": "【6格】CD支架"
+          },
+          {
+            "imageUrl": "https://cbu01.alicdn.com/img/ibank/O1CN01k1gkw32CT9N7lcp2v_!!2220383608474-0-cib.jpg",
+            "name": "【8格】CD支架"
+          }
+        ]
+      }
+    ],
+    "skuSelectorModel": {
+      "activityUrl": "",
+      "channelType": "fx",
+      "extraInfo": {
+        "abTestInfo": {
+          "abTestValueInfo": {
+            "annual_sales": "1",
+            "zeus_gyp_onhand_price": "1",
+            "same_design_sale": "1",
+            "page_zgc_dimension": "0",
+            "page_yanxuan_qualityCert": "Y",
+            "page_add_custom_service": "1",
+            "sku_select_hot_recommend": "0",
+            "standard_offer_price_power_replace": "2",
+            "same_item_remark_opened": "0"
+          },
+          "exposeClickInfo": {
+            "same": {
+              "AbIds": "2514606"
+            },
+            "annual": {
+              "AbTIds": "48073",
+              "AbIds": "2511569"
+            },
+            "sku": {
+              "AbIds": "2511312"
+            }
+          },
+          "pvTrackInfo": {
+            "AbIds": "2515414#2517407#2518968"
+          }
+        },
+        "offerModelSign": {
+          "isBuyerProtection": true,
+          "isSupportMix": true,
+          "isOnDemandOffer": true,
+          "isSupplyStockOffer": true,
+          "hasFreightTemplate": true,
+          "isGovCouponOfferInOD": false,
+          "hasAIMaterials": true,
+          "hasSearchPicture": true,
+          "hasWhitePicInOffer": true,
+          "hasOrder": true,
+          "fx48hPickupAssr": true,
+          "isOptimalLogisticsOffer": true,
+          "isAegisTrade": true,
+          "isHtqqItem": true,
+          "isKJFreeShipping": true,
+          "isFxSellerGenAiMaterial": true,
+          "isHTQQOffer": true,
+          "isSkuTradeSupported": true,
+          "isSearchOffer": true,
+          "isKjOrdinaryOffer": true,
+          "isVideoDemandOffer": true,
+          "isAeJit": true,
+          "isCndOffer": true,
+          "isAlipaySupported": true,
+          "isGpfOffer": true,
+          "isUmp": true,
+          "isSupportStock": true,
+          "isImportOffer": true,
+          "hasSendGoodsAddress": true
+        },
+        "skuFeatures": {
+          "6157035487298": {
+            "cbu_hot_type": "skuprice_v1",
+            "cbu_hot_sale_type": "热销款"
+          }
+        },
+        "sellerUserId": 2220383608474
+      },
+      "freightInfo": {
+        "deliveryFee": "TEMPLATED",
+        "deliveryFulfillmentSolution": {
+          "offerId": 1001672530707
+        },
+        "freeDeliverFee": false,
+        "freeEndAmount": -1,
+        "freightDiagnosisResultModel": {
+          "offerId": 1001672530707,
+          "showFreightBenefitTag": false
+        },
+        "location": "浙江省金华市",
+        "locationCode": "855428128",
+        "locationDivisionCode": "330782",
+        "logisticsText": "预计9月28日(周一)送达",
+        "marketingFreePostage": false,
+        "officialLogistics": false,
+        "receiveAddressAreaCodeList": [
+          "410000",
+          "411300",
+          "411327"
+        ],
+        "receiveAddressId": "6998546040",
+        "recieveAddress": "河南省南阳市",
+        "recieveAddressCode": "411327",
+        "skuWeight": {
+          "6157035487298": 0.5,
+          "6157035487299": 0.5
+        },
+        "subTemplateId": 493243339,
+        "totalCost": 3.5,
+        "unitWeight": 0
+      },
+      "mainImageList": [
+        {
+          "fullPathImageURI": "https://cbu01.alicdn.com/img/ibank/O1CN01r3rIf62CT9N8CCCjw_!!2220383608474-0-cib.jpg",
+          "imageURI": "img/ibank/O1CN01r3rIf62CT9N8CCCjw_!!2220383608474-0-cib.jpg"
+        },
+        {
+          "fullPathImageURI": "https://cbu01.alicdn.com/img/ibank/O1CN01Lrf2jW2CT9N6yShts_!!2220383608474-0-cib.jpg",
+          "imageURI": "img/ibank/O1CN01Lrf2jW2CT9N6yShts_!!2220383608474-0-cib.jpg"
+        },
+        {
+          "fullPathImageURI": "https://cbu01.alicdn.com/img/ibank/O1CN019QxuA62CT9N7lYj5e_!!2220383608474-0-cib.jpg",
+          "imageURI": "img/ibank/O1CN019QxuA62CT9N7lYj5e_!!2220383608474-0-cib.jpg"
+        },
+        {
+          "fullPathImageURI": "https://cbu01.alicdn.com/img/ibank/O1CN016xmk9w2CT9N7bBKRW_!!2220383608474-0-cib.jpg",
+          "imageURI": "img/ibank/O1CN016xmk9w2CT9N7bBKRW_!!2220383608474-0-cib.jpg"
+        },
+        {
+          "fullPathImageURI": "https://cbu01.alicdn.com/img/ibank/O1CN01jtlFl52CT9N6BZ3KB_!!2220383608474-0-cib.jpg",
+          "imageURI": "img/ibank/O1CN01jtlFl52CT9N6BZ3KB_!!2220383608474-0-cib.jpg"
+        }
+      ],
+      "offerId": 1001672530707,
+      "promotionModel": {
+        "aggregateNewPromotionInfo": [
+          {
+            "features": {
+              "calSkuCartFromMkc": "false"
+            },
+            "groupType": "DEFAULT_GROUP"
+          }
+        ],
+        "aggregatePromotionInfo": [],
+        "bigPromotionInfo": {
+          "bigPromotionCountdown": -1,
+          "bigPromotionStatus": "NONE",
+          "burstBeginTime": -1,
+          "burstEndTime": -1,
+          "preheatTime": -1,
+          "promotionResources": {}
+        },
+        "endTime": 0,
+        "hotTime": 0,
+        "promotionExtendInfo": {
+          "offerDetailUrgeBarModel": "null"
+        },
+        "promotionExtends": {
+          "majorMemberInfo": {
+            "_defaultModel": {
+              "tractionContent": "清洁收纳新秀买家直享",
+              "buyerBusinessLevel": "GENERAL_BUYER",
+              "extInfo": {
+                "buttonColor": "null"
+              },
+              "hasAction": false,
+              "buyerBusinessStar": 0,
+              "buyerUserId": 2112932301,
+              "class": "com.alibaba.china.medal.club.memberRight.model.buyerlevel.BuyerBusinessLevelRightDisplayModel",
+              "rightQAMap": {
+                "98": "[\"(1)指商品在1688平台上，针对专业买家及以上等级用户可直享老客价活动\",\"(2)老客价活动商品由商家通过平台工具/活动报名选择并设置价格，具体能否享受折扣优惠以商品展示为准，最终成交价格以订单结算页价格为准。\"]"
+              },
+              "buyerLevel": "L1"
+            }
+          },
+          "wholesalePriceQualified": true
+        },
+        "promotionSign": {
+          "cross2buy": false,
+          "freePostage": false,
+          "freshmanActivity": false,
+          "fxOfficialTimeLimitActivity": false,
+          "fxSellerTimeLimitActivity": false,
+          "hasBigPromotion": false,
+          "hasMarketPromotion": false,
+          "hasPurcharseMark": false,
+          "hpAdditionalDiscount": false,
+          "limitedTimePromotion": false,
+          "promotionRemoteCal": false,
+          "shareWithGift": false,
+          "signs": {
+            "isHpAdditionalDiscount": false,
+            "hasBigPromotion": false,
+            "isFreshmanActivity": false,
+            "promotionRemoteCal": false,
+            "skuFixPromotion": false,
+            "isFreePostage": false,
+            "isShareWithGift": false,
+            "isFxSellerTimeLimitActivity": false,
+            "isLimitedTimePromotion": false,
+            "isDisPricePromotion": false,
+            "isFxOfficialTimeLimitActivity": false,
+            "hasPurcharseMark": false,
+            "isFixedPricePromotion": false
+          },
+          "skuFixPromotion": false
+        },
+        "startTime": 0
+      },
+      "sceneType": "default",
+      "sellerLoginId": "义乌市虎嗅日用品厂",
+      "skuPropsList": [
+        {
+          "fid": 3216,
+          "prop": "颜色",
+          "value": [
+            {
+              "imageUrl": "https://cbu01.alicdn.com/img/ibank/O1CN01CTBKZQ2CT9N7Gxn0o_!!2220383608474-0-cib.jpg",
+              "name": "【6格】CD支架"
+            },
+            {
+              "imageUrl": "https://cbu01.alicdn.com/img/ibank/O1CN01k1gkw32CT9N7lcp2v_!!2220383608474-0-cib.jpg",
+              "name": "【8格】CD支架"
+            }
+          ]
+        }
+      ],
+      "tradeModel": {
+        "beginAmount": 2,
+        "canBookedAmount": 59743,
+        "hasPromotion": false,
+        "maxPrice": "4.00",
+        "minPrice": "3.00",
+        "mixModel": {
+          "mixNumber": 2,
+          "mixOneForSale": false,
+          "supportMix": true
+        },
+        "offerIDatacenterSellInfo": {
+          "材质": "涤纶（聚酯纤维）",
+          "功能": "拆装",
+          "款式": "壁挂式",
+          "收纳场景": "餐厅",
+          "安装方式": "桌面式",
+          "sellPointModel": "{\"id\":35,\"name\":\"专业化CPV(15)\",\"show\":\"材质_涤纶（聚酯纤维）_algo,功能_免打孔_algo,功能_多用途_algo,功能_拆装_algo,款式_壁挂式_algo,收纳场景_桌面收纳_custom,收纳场景_客厅收纳_custom,收纳场景_化妆收纳_custom,收纳场景_卧室收纳_custom,收纳场景_卫浴收纳_custom,收纳场景_旅行收纳_custom,收纳场景_办公室_algo,收纳场景_床头_algo,收纳场景_餐厅_algo,安装方式_桌面式_algo\",\"type\":\"test_idatacenter_sell\"}"
+        },
+        "offerId": 1001672530707,
+        "offerPriceModel": {
+          "currentPrices": [
+            {
+              "beginAmount": 2,
+              "price": "3.00"
+            },
+            {
+              "beginAmount": 2,
+              "price": "4.00"
+            }
+          ],
+          "onePiecePriceExp": false,
+          "priceAdv": {
+            "source": "OTHER"
+          },
+          "priceDisplayType": "skuPrice"
+        },
+        "priceDisplay": "3.00-4.00",
+        "saleCount": 33,
+        "skuMap": [
+          {
+            "canBookCount": 29882,
+            "discountPrice": "4.00",
+            "price": "4.00",
+            "priceAmount": 2,
+            "promotionSku": false,
+            "saleCount": 0,
+            "skuId": 6157035487299,
+            "specAttrs": "【8格】CD支架",
+            "specId": "c36eacc1f421522a1c20d884eb2c6811"
+          },
+          {
+            "canBookCount": 29861,
+            "discountPrice": "3.00",
+            "price": "3.00",
+            "priceAmount": 2,
+            "promotionSku": false,
+            "saleCount": 0,
+            "skuId": 6157035487298,
+            "specAttrs": "【6格】CD支架",
+            "specId": "81322de18456c14a4683af5f1e27d3fc"
+          }
+        ],
+        "skuTradeSupported": true,
+        "supportOnePieceRetail": false,
+        "supportWirelessOnly": false,
+        "tradeWithoutPromotion": {
+          "canBookedAmountOriginal": 59743,
+          "offerBeginAmount": 2,
+          "offerIsSkuTradeSupported": true,
+          "offerMaxPrice": "4.00",
+          "offerMinPrice": "3.00",
+          "offerPriceDisplay": "3.00-4.00",
+          "skuMapOriginal": [
+            {
+              "canBookCount": 29882,
+              "discountPrice": "4.00",
+              "price": "4.00",
+              "priceAmount": 2,
+              "promotionSku": false,
+              "saleCount": 0,
+              "skuId": 6157035487299,
+              "specAttrs": "【8格】CD支架",
+              "specId": "c36eacc1f421522a1c20d884eb2c6811"
+            },
+            {
+              "canBookCount": 29861,
+              "discountPrice": "3.00",
+              "price": "3.00",
+              "priceAmount": 2,
+              "promotionSku": false,
+              "saleCount": 0,
+              "skuId": 6157035487298,
+              "specAttrs": "【6格】CD支架",
+              "specId": "81322de18456c14a4683af5f1e27d3fc"
+            }
+          ]
+        },
+        "unit": "个"
+      },
+      "verticalType": "default"
+    },
+    "skuSourceType": "default"
+  }
+}

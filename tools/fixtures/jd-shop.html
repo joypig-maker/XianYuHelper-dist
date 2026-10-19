@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>所有商品-罗蒙旗舰店</title>
+<style>
+  /* 给卡片真实尺寸——cardBox() 会看 getBoundingClientRect，
+     宽高不够就认不出卡片。真机上 .gl-i-wrap 是 220x330 左右。 */
+  .gl-warp { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; }
+  .gl-item { width: 240px; height: 360px; margin: 8px; border: 1px solid #eee; }
+  .jPic img { width: 220px; height: 220px; display: block; }
+  .jGoodsInfo { padding: 4px; font-size: 12px; }
+  .jdPrice { color: #e1251b; font-weight: bold; }
+  .jDesc a { color: #333; text-decoration: none; display: block; height: 32px; overflow: hidden; }
+</style>
+</head>
+<body>
+
+<!--
+  京东店铺「所有商品」页的 DOM 固件。
+
+  结构不是编的，是从真机 dump 出来的（tools/diag-jd-shopdeep.js 输出的结构树）：
+    li.jSubObject.gl-item
+      div.gl-i-wrap
+        div.jPic > a[href=//item.jd.com/<id>.html] > img
+        div.jScroll                      ← 卡片内的小图轮播，10 个 li，与商品 ID 无关
+        div.jGoodsInfo
+          div.jPrice > div.jdPrice > span.jRmb(￥) + span.jdNum(64.30)
+          div.jDesc  > a[href=//item.jd.com/<id>.html]   ← 标题
+          div.jExtra > a[href=...#comment]               ← 评价数
+
+  两个要点：
+    · 商品 ID 从 a[href*="item.jd.com"] 取（**这页有直链**，和搜索页不一样）
+    · 价格被拆成 ￥ 和数值两个相邻节点，jdPrice 那层拼起来正好是「￥64.30」
+  商品数据为真机抓到的真实条目（标题/价格/图 URL 原样）。
+-->
+<div class="goods-list gl-type-1 J-goods-list">
+  <ul class="gl-warp clearfix">
+
+    <li class="jSubObject gl-item" clstag="pageclick|keycount|AllGoods_861471775_1|774716">
+      <div class="gl-i-wrap">
+        <div class="jPic">
+          <a href="//item.jd.com/10216824761563.html?pcdk=A93i5DYmaExQsJe_tm6J1">
+            <img src="//img14.360buyimg.com/n7/jfs/t1/425024/6/9565/2123818/69f02b5bFd8ee9ec9/00835a05a00c2a10.jpg"
+                 alt="罗蒙10A抗菌100%纯棉短袖POLO衫">
+          </a>
+        </div>
+        <div class="jScroll">
+          <a class="jScrollBtn jScrollPrev jCurrent" href="javascript:;"></a>
+          <div class="jScrollWrap">
+            <ul><li class="jCurrent"></li><li></li><li></li></ul>
+          </div>
+          <a class="jScrollBtn jScrollNext" href="javascript:;">&gt;</a>
+        </div>
+        <div class="jGoodsInfo">
+          <div class="jPrice">
+            <div class="jdPrice">
+              <span class="jRmb">￥</span><span class="jdNum">64.30</span>
+            </div>
+          </div>
+          <div class="jDesc">
+            <a href="//item.jd.com/10216824761563.html?pcdk=A93i5DYmaExQsJe_tm6J1">罗蒙10A抗菌100%纯棉短袖POLO衫男士夏新款商务休闲高端T恤衫半袖上衣 浅灰 L (175) （建议115-135</a>
+          </div>
+          <div class="jExtra">
+            <a href="//item.jd.com/10216824761563.html#comment">已有人评价<em class="jCommentNum">2万+</em></a>
+          </div>
+        </div>
+      </div>
+    </li>
+
+    <li class="jSubObject gl-item" clstag="pageclick|keycount|AllGoods_861471775_1|774717">
+      <div class="gl-i-wrap">
+        <div class="jPic">
+          <a href="//item.jd.com/10149735636398.html?pcdk=Bx7Qw">
+            <img src="//img14.360buyimg.com/n7/jfs/t1/282201/2/24318/140019/68076ed7F1a643785/3a7ddc0e26268d9e.jpg"
+                 alt="罗蒙（ROMON）父亲节礼物">
+          </a>
+        </div>
+        <div class="jScroll">
+          <a class="jScrollBtn jScrollPrev jCurrent" href="javascript:;"></a>
+          <div class="jScrollWrap"><ul><li class="jCurrent"></li><li></li></ul></div>
+          <a class="jScrollBtn jScrollNext" href="javascript:;">&gt;</a>
+        </div>
+        <div class="jGoodsInfo">
+          <div class="jPrice">
+            <div class="jdPrice">
+              <span class="jRmb">￥</span><span class="jdNum">59.00</span>
+            </div>
+          </div>
+          <div class="jDesc">
+            <a href="//item.jd.com/10149735636398.html?pcdk=Bx7Qw">罗蒙（ROMON）父亲节礼物含桑蚕丝凉感短袖POLO衫男士夏新款冰丝无痕T恤送爸爸 豆绿 XL (175) （建议135</a>
+          </div>
+          <div class="jExtra">
+            <a href="//item.jd.com/10149735636398.html#comment">已有人评价<em class="jCommentNum">1万+</em></a>
+          </div>
+        </div>
+      </div>
+    </li>
+
+    <li class="jSubObject gl-item" clstag="pageclick|keycount|AllGoods_861471775_1|774718">
+      <div class="gl-i-wrap">
+        <div class="jPic">
+          <a href="//item.jd.com/10214105977940.html?pcdk=Cy8Rt">
+            <img src="//img13.360buyimg.com/n7/jfs/t1/421372/40/5463/255692/69e1fcb3Fff840e1a/00835a05a0bbd050.jpg"
+                 alt="罗蒙高端防晒冰丝凉感短袖t恤衫">
+          </a>
+        </div>
+        <div class="jScroll">
+          <a class="jScrollBtn jScrollPrev jCurrent" href="javascript:;"></a>
+          <div class="jScrollWrap"><ul><li class="jCurrent"></li></ul></div>
+          <a class="jScrollBtn jScrollNext" href="javascript:;">&gt;</a>
+        </div>
+        <div class="jGoodsInfo">
+          <div class="jPrice">
+            <div class="jdPrice">
+              <span class="jRmb">￥</span><span class="jdNum">41.00</span>
+            </div>
+          </div>
+          <div class="jDesc">
+            <a href="//item.jd.com/10214105977940.html?pcdk=Cy8Rt">罗蒙高端防晒冰丝凉感短袖t恤衫男夏季中青年薄款高弹百搭POLO爸爸装 白色 M (165) 【建议95-110斤】</a>
+          </div>
+          <div class="jExtra">
+            <a href="//item.jd.com/10214105977940.html#comment">已有人评价<em class="jCommentNum">5000+</em></a>
+          </div>
+        </div>
+      </div>
+    </li>
+
+    <!--
+      第 4 张：**老版搜索页模板**。
+      京东店铺页不止一套模板 —— 实测「分类页」是装修模板
+      （.jPic/.jDesc/.jPrice>.jdPrice>.jRmb+.jdNum），而「所有商品」页
+      拿不到价格，说明那页不是这套。
+      这张的结构是按京东经典搜索页写的：
+        div.p-img > a > img
+        div.p-price > strong > i(￥) + em(64.30)
+        div.p-name  > a                        ← 标题
+      注意：**这张的结构尚未在店铺页真机确认**（mall.jd.com 限流太凶，
+      抓一次要等十几分钟），先用来保证「配置能处理老模板」这件事本身不退化。
+      真机结构一确认就回来换成实测的。
+    -->
+    <li class="gl-item" data-sku="100012043978" clstag="pageclick|keycount|AllGoods_861471775_1|774719">
+      <div class="gl-i-wrap">
+        <div class="p-img">
+          <a href="//item.jd.com/100012043978.html">
+            <img src="//img13.360buyimg.com/n7/jfs/t1/107969/29/54256/121353/671c5198F05dd34c3/a43fa5f85317476c.jpg"
+                 alt="老模板样例商品">
+          </a>
+        </div>
+        <div class="p-price">
+          <strong class="J_price_100012043978"><i>￥</i><em>28.23</em></strong>
+        </div>
+        <div class="p-name">
+          <a href="//item.jd.com/100012043978.html">罗蒙（ROMON）老模板样例商品 深蓝 XL</a>
+        </div>
+      </div>
+    </li>
+
+  </ul>
+</div>
+
+<!-- 分页控件：实测结构（< > 两个按钮 + 当前/总页） -->
+<div id="J_topPage" class="g-pager">
+  <span class="fp-text"><b>1</b><em>/</em><i>147</i></span>
+  <a class="fp-prev disabled" href="javascript:;" onclick="return false;">&lt;</a>
+  <a class="fp-next" onclick="pageGoodsList(1 + 1, this)" href="javascript:;">&gt;</a>
+</div>
+
+<!-- 干扰项：店铺页上确实存在的这些链接，不能被当成商品采进来 -->
+<div class="shop-header">
+  <a href="//mall.jd.com/index-774716.html">罗蒙旗舰店</a>
+  <a href="//chat.jd.com/index.action?entry=jshop&pid=10216824761563">联系客服</a>
+  <a href="//mall.jd.com/view_search-991882-8441300-99-1-20-1.html">短袖T恤/POLO衫</a>
+  <a href="//mall.jd.com/view_search-991882-8441307-99-1-20-1.html">长袖衬衫</a>
+</div>
+
+<!-- shopId 挂在这种属性上 —— 早先的兜底路径会把它当商品采出来 -->
+<div class="shop-meta" data-id="774716" data-venderid="778749" data-shopid="774716">
+  <span>共2935件商品</span>
+</div>
+
+</body>
+</html>
