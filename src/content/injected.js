@@ -458,7 +458,16 @@
 
     // 详情接口不认列表页上下文时，借后台标签页采一次。
     // 拿不到就往下走原来的路（会失败，但保持既有行为不变、不额外报错）。
-    if (SITE.detailPageOnly && !isOnDetailPage(itemId)) {
+    //
+    // ⚠️⚠️ 递归保险（2026-10-23 加）：这个「借后台页」的动作，
+    //   在后台页自己的 content script 里也会被触发 ——
+    //   后台页采详情 → fetchCardDetailCore → 发现自己不在详情页
+    //   → 又借一个后台页 → ♻️ 无限递归。
+    //   触发条件是 isOnDetailPage 判定错了（闲鱼的 /item?id= 形态
+    //   曾经匹配不上默认正则，见 sites.js 的 detailPageRe）。
+    //   现在配置已修正，但这里再加一道保险：
+    //   已经在后台页里（由 SW 开的）就不再借，直接采。
+    if (SITE.detailPageOnly && !isOnDetailPage(itemId) && !inBackgroundTab()) {
       var viaTab = await fetchDetailViaTab(itemId);
       if (viaTab) return viaTab;
     }
@@ -938,6 +947,16 @@
 
   // 站点没配 pageIdRe 时的兜底正则
   var PAGE_ID_RE = /[?&]id=(\d{5,20})|itemId=(\d{5,20})/;
+
+  /**
+   * 当前这个页面是不是 SW 开的后台标签页。
+   *
+   * 用来防递归：后台页采详情时不能再「借后台页」，
+   * 否则 ♻️ 无限递归。标记由 SW 发消息时带 inBgTab 传进来。
+   */
+  function inBackgroundTab() {
+    return !!(state && state.inBgTab);
+  }
 
   function currentItemId() {
     if (!SITE) return '';
@@ -1831,6 +1850,10 @@
     bus.on('bridge', 'collect-detail', function (p) {
       var id = (p && p.itemId) || currentItemId();
       if (!id) return { ok: false, error: '无商品 ID' };
+      // SW 开的后台标签页会带 inBgTab 标记，记下来。
+      // 作用是防递归：这个页面不能再「借后台页」去采，
+      // 否则 ♻️ 无限递归（详见 fetchCardDetailCore 的注释）。
+      if (p && p.inBgTab) state.inBgTab = true;
       // 后台标签页「加载完成」不等于「内容渲染完成」——京东详情页是 SPA，
       // 刚 complete 时 DOM 里还是空的，立刻取会拿到空结果。等一拍再采。
       return new Promise(function (r) { setTimeout(r, 2500); }).then(function () {

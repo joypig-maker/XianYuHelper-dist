@@ -904,7 +904,14 @@ async function bgCollectOne(itemId, url) {
     loaded = await bgNavigate(tabId, url);
     if (!loaded) return null;
     for (var i = 0; i < bgDetail.MAX_TRY; i++) {
-      var r = await bgSend(tabId, { type: 'xy:collect-detail', itemId: itemId });
+      // ★ inBgTab 标记：这个页面是 SW 自己开的后台标签页。
+      //   内容脚本收到它就知道「别再借后台页了」——
+      //   否则会无限递归（后台页采详情 → 发现自己不在详情页 → 又借后台页 → …）。
+      //   闲鱼曾因 detailPageRe 没配、isOnDetailPage 恒为 false 而踩中，
+      //   表现是标签页狂开 + 详情永远取不到 + 规格图下不来。
+      var r = await bgSend(tabId, {
+        type: 'xy:collect-detail', itemId: itemId, inBgTab: true
+      });
       if (r && r.ok && r.detail) return r.detail;
       // bridge 已经应答但说采不到（接口超时 / 风控页），再重试也是同样结果
       if (r) return null;
@@ -1313,7 +1320,13 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
               imgTotal++;
               tasks.push(function () {
                 return download({
-                  url: val.image,
+                  // ★ 这里也过一道 normalizeImageUrl。
+                  //   规格图的地址来自接口，闲鱼给的是 **http://**；
+                  //   闲鱼页面是 HTTPS → 混合内容被浏览器拦截 → 规格图下不来。
+                  //   bridge 层已经转过一次，这里再转一次是保险：
+                  //   后台标签页采回来的详情也走同一条下载路径，
+                  //   不能指望每一层都记得转。
+                  url: U.normalizeImageUrl(val.image),
                   filename: dir + '/' + U.SKU_DIR + '/' +
                     U.skuSpecImageName(g, v, val.value, val.image),
                   conflictAction: 'uniquify',

@@ -27,6 +27,15 @@
     // 商品 ID：既支持 /item?id=123 也支持 /item/123
     idRe: /[?&]id=(\d{5,20})|(?:^|\/)item\/(\d{5,20})/i,
     pageIdRe: /[?&]id=(\d{5,20})|\/item\/(\d{5,20})/i,
+    // ★ 详情页判定。**必须配**，否则会无限递归（2026-10-23 实测定位）：
+    //   默认正则是 /item\.htm|\/item\//i —— 匹配不上闲鱼的
+    //   「/item?id=123」形态（没有斜杠结尾），于是 isOnDetailPage 恒为 false。
+    //   而 fetchCardDetailCore 的第一件事就是
+    //     if (detailPageOnly && !isOnDetailPage(id)) → fetchDetailViaTab(id)
+    //   后台标签页采详情时也走这段 → 又去借一个后台标签页 → 又采 →
+    //   ♻️ 无限递归。表现是：标签页狂开、详情永远取不到、规格图下不来。
+    //   淘宝配了这条、闲鱼漏了，就是这个坑。
+    detailPageRe: /\/item(?:\?|&id=|\/)/i,
     itemUrl: function (id) { return 'https://www.goofish.com/item?id=' + id; },
     linkSel: function (id) { return 'a[href*="item?id=' + id + '"]'; },
 

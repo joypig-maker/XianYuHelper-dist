@@ -800,7 +800,16 @@
         return {
           name: def.name || '',
           values: (def.values || []).map(function (v) {
-            return { value: v.value || '', image: v.image || '' };
+            // ★ 规格图也要过 normalizeImageUrl！
+            //   主图走 filterItemImages → 里面调了 normalizeImageUrl，
+            //   所以主图是 https；但规格图这条路径**原来没有**，
+            //   拿到的是接口给的原始 http:// 地址。
+            //   闲鱼页面是 HTTPS → 混合内容被浏览器拦截 → 规格图一张都下不来。
+            //   同一个商品主图能下、规格图下不了，就是这个差别。
+            return {
+              value: v.value || '',
+              image: U.normalizeImageUrl(v.image || '')
+            };
           })
         };
       }),
