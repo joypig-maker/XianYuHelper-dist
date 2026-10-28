@@ -110,7 +110,26 @@
     } else {
       detailMap[m.itemId] = m;
     }
+    // ★ 想要人数/浏览量：空值不能覆盖已有值。
+    //   这两个字段两个来源（接口的 wantCnt、卡片 DOM 的「N 人想要」），
+    //   详情接口那次可能正好没取到（返回 ''），
+    //   直接 Object.assign 就会把卡片上已有的值冲掉。
+    ['wantNum', 'browseNum'].forEach(function (k) {
+      var nv = m[k];
+      if (nv == null || String(nv).trim() === '') {
+        var keep = detailMap[m.itemId][k];
+        if (keep != null && String(keep).trim() !== '') detailMap[m.itemId][k] = keep;
+      }
+    });
     cardIndex[m.itemId] = Object.assign({}, cardIndex[m.itemId] || {}, m);
+    // 同理，cardIndex 里已有的 wantNum/browseNum 也不能被空的冲掉
+    ['wantNum', 'browseNum'].forEach(function (k) {
+      var nv = m[k];
+      if (nv == null || String(nv).trim() === '') {
+        var keep = cardIndex[m.itemId][k];
+        if (keep != null && String(keep).trim() !== '') cardIndex[m.itemId][k] = keep;
+      }
+    });
     return null;
   });
   bus && bus.on('injected', 'ensure-progress', function (m) {
@@ -1152,6 +1171,160 @@
     renderCount();
   }
 
+  /* ---------------- 筛选与排序 ---------------- */
+
+  /** 筛选/排序的条件。存起来是为了面板重绘后不丢用户的输入。 */
+  var filterState = {
+    wantMin: '',        // 想要人数 ≥ N（空 = 不限）
+    priceMin: '',      // 价格下限（空 = 不限）
+    priceMax: '',      // 价格上限（空 = 不限）
+    sort: 'default'    // 排序方式
+  };
+
+  /**
+   * 取一个商品的「有效数据」。
+   *
+   * 优先用补全后的详情（detailMap），没有再用列表页卡片数据。
+   * 详情里字段更全（接口的 wantCnt/browseCnt），卡片里有 DOM 抓的
+   * 「N 人想要」，两边互补。
+   */
+  function effData(itemId) {
+    var d = detailMap[itemId] || cardIndex[itemId] || null;
+    if (!d) {
+      var c = null;
+      for (var i = 0; i < cardList.length; i++) {
+        if (cardList[i] && cardList[i].itemId === itemId) { c = cardList[i]; break; }
+      }
+      d = c;
+    }
+    return d || {};
+  }
+
+  /** 取数字，失败返回 null（区别于 0 —— 0 是有效值） */
+  function numOf(v) {
+    if (v == null || v === '') return null;
+    var n = Number(String(v).replace(/[^\d.]/g, ''));
+    return isFinite(n) ? n : null;
+  }
+
+  /** 商品的价格（元）。SKU 价格优先，其次商品级价格 */
+  function priceOf(d) {
+    var p = numOf(d.price);
+    if (p != null) return p;
+    var sk = d.skus;
+    if (sk && sk.list && sk.list.length) {
+      var ps = sk.list.map(function (s) { return numOf(s.price); })
+        .filter(function (x) { return x != null; });
+      if (ps.length) return Math.min.apply(null, ps);
+    }
+    return null;
+  }
+
+  /** 想要人数。没有数据返回 null —— 与 0 区分开（0 人想要是有效值） */
+  function wantOf(d) {
+    var w = numOf(d.wantNum);
+    return w;
+  }
+
+  /** 浏览量 */
+  function browseOf(d) {
+    var b = numOf(d.browseNum);
+    return b;
+  }
+
+  /**
+   * 判断一个商品是否符合筛选条件。
+   * @returns {{ok:boolean, reason:string}} reason 用于告诉用户为什么没被选中
+   */
+  function matchFilter(itemId) {
+    var d = effData(itemId);
+    var wMin = numOf(filterState.wantMin);
+    var pMin = numOf(filterState.priceMin);
+    var pMax = numOf(filterState.priceMax);
+
+    if (wMin != null) {
+      var w = wantOf(d);
+      // ★ 缺数据时**不判为不符合**，而是单独标记 ——
+      //   否则用户会看到「填了想要人数，结果一个都没选上」，
+      //   根本不知道是因为闲鱼没给这个数。
+      if (w == null) return { ok: true, missing: 'want' };
+      if (w < wMin) return { ok: false, reason: '想要人数 ' + w + ' < ' + wMin };
+    }
+    if (pMin != null || pMax != null) {
+      var p = priceOf(d);
+      if (p == null) return { ok: true, missing: 'price' };
+      if (pMin != null && p < pMin) return { ok: false, reason: '价格 ' + p + ' < ' + pMin };
+      if (pMax != null && p > pMax) return { ok: false, reason: '价格 ' + p + ' > ' + pMax };
+    }
+    return { ok: true };
+  }
+
+  /** 当前排序下的商品顺序 */
+  function sortedCards() {
+    var list = cardList.slice();
+    var s = filterState.sort;
+    if (!s || s === 'default') return list;
+    var dir = s.charAt(0) === '-' ? -1 : 1;
+    var key = s.replace(/^-/, '');
+    list.sort(function (a, b) {
+      var da = effData(a.itemId), db = effData(b.itemId);
+      var va, vb;
+      if (key === 'price') { va = priceOf(da); vb = priceOf(db); }
+      else if (key === 'want') { va = wantOf(da); vb = wantOf(db); }
+      else if (key === 'browse') { va = browseOf(da); vb = browseOf(db); }
+      else { va = 0; vb = 0; }
+      // 缺数据的沉到末尾（升序时在最后，降序时也在最后），
+      // 免得「没数据」的商品混在中间看起来像有值
+      if (va == null && vb == null) return 0;
+      if (va == null) return 1;
+      if (vb == null) return -1;
+      if (va === vb) return 0;
+      return (va < vb ? -1 : 1) * dir;
+    });
+    return list;
+  }
+
+  /**
+   * 按条件筛选并勾选。
+   * @param {boolean} append true = 只追加勾选符合条件的；false = 重置为只勾符合条件的
+   */
+  function applyFilter(append) {
+    var hit = 0, miss = [];
+    var missingWant = 0, missingPrice = 0;
+    if (!append) {
+      // 重置：先全不选
+      cardList.forEach(function (c) {
+        if (c && c.itemId) { delete selected[c.itemId]; syncCheckUI(c.itemId, false); }
+      });
+    }
+    cardList.forEach(function (c) {
+      if (!c || !c.itemId) return;
+      var r = matchFilter(c.itemId);
+      if (r.ok) {
+        selected[c.itemId] = 1;
+        syncCheckUI(c.itemId, true);
+        hit++;
+        if (r.missing === 'want') missingWant++;
+        if (r.missing === 'price') missingPrice++;
+      }
+    });
+    renderCount();
+    var msg = '已勾选 ' + hit + ' 个';
+    if (missingWant) msg += '（' + missingWant + ' 个缺想要人数，未参与筛选）';
+    if (missingPrice) msg += '（' + missingPrice + ' 个缺价格，未参与筛选）';
+    toast(msg);
+    render();
+  }
+
+  /** 排序下拉的选项 */
+  var SORT_OPTIONS = [
+    ['default', '默认顺序'],
+    ['price-', '价格 从低到高'],
+    ['price', '价格 从高到低'],
+    ['want', '想要人数 从多到少'],
+    ['browse', '浏览量 从多到少']
+  ];
+
   /* ---------------- 整店页：把商品渲染到页面上 ----------------
    *
    * 淘宝店铺页的商品是接口拉来的（mtop.taobao.shop.simple.item.fetch），
@@ -1389,10 +1562,12 @@
 
   function renderPicker(body) {
     var box = el('div', 'xy-pick');
-    var list = cardList.slice(0, PICK_LIMIT);
+    // 按当前排序显示
+    var list = sortedCards().slice(0, PICK_LIMIT);
 
     list.forEach(function (c) {
       if (!c || !c.itemId) return;
+      var d = effData(c.itemId);
       var row = el('label', 'xy-pick-row' + (selected[c.itemId] ? ' xy-check-on' : ''));
       row.setAttribute('data-xy-id', c.itemId);
 
@@ -1411,6 +1586,11 @@
       if (c.skus && c.skus.list && c.skus.list.length) {
         meta.appendChild(el('span', 'xy-pick-tag', c.skus.list.length + ' 规格'));
       }
+      // 想要人数 / 浏览量：筛选排序的依据，显示出来用户才知道能按什么筛
+      var w = wantOf(d);
+      if (w != null) meta.appendChild(el('span', 'xy-pick-want', w + '人想要'));
+      var b = browseOf(d);
+      if (b != null) meta.appendChild(el('span', 'xy-pick-browse', b + '浏览'));
       main.appendChild(meta);
       row.appendChild(main);
 
@@ -1438,6 +1618,98 @@
     if (inp) inp.checked = !!on;
   }
 
+  /**
+   * 筛选条：想要人数 + 价格区间 + 排序。
+   *
+   * 为什么放在列表区而不是设置面板：这是**每次选货都要用**的高频动作，
+   * 跟「全选/反选」是同一类操作，不该藏在设置里。
+   *
+   * 输入框一律留空 = 不限。填了才生效。
+   */
+  function renderFilterBar(body) {
+    var box = el('div', 'xy-filter');
+
+    // —— 第一行：筛选条件 ——
+    var row1 = el('div', 'xy-filter-row');
+
+    var wantWrap = el('label', 'xy-filter-item');
+    wantWrap.appendChild(el('span', 'xy-filter-label', '想要≥'));
+    var wantIn = document.createElement('input');
+    wantIn.type = 'number';
+    wantIn.className = 'xy-filter-input';
+    wantIn.placeholder = '不限';
+    wantIn.value = filterState.wantMin;
+    wantIn.addEventListener('input', function () { filterState.wantMin = wantIn.value; });
+    wantIn.addEventListener('click', function (e) { e.stopPropagation(); });
+    wantWrap.appendChild(wantIn);
+    row1.appendChild(wantWrap);
+
+    var priceWrap = el('label', 'xy-filter-item');
+    priceWrap.appendChild(el('span', 'xy-filter-label', '价格'));
+    var pMin = document.createElement('input');
+    pMin.type = 'number';
+    pMin.className = 'xy-filter-input xy-filter-input-w';
+    pMin.placeholder = '低';
+    pMin.value = filterState.priceMin;
+    pMin.addEventListener('input', function () { filterState.priceMin = pMin.value; });
+    pMin.addEventListener('click', function (e) { e.stopPropagation(); });
+    priceWrap.appendChild(pMin);
+    priceWrap.appendChild(el('span', 'xy-filter-sep', '-'));
+    var pMax = document.createElement('input');
+    pMax.type = 'number';
+    pMax.className = 'xy-filter-input xy-filter-input-w';
+    pMax.placeholder = '高';
+    pMax.value = filterState.priceMax;
+    pMax.addEventListener('input', function () { filterState.priceMax = pMax.value; });
+    pMax.addEventListener('click', function (e) { e.stopPropagation(); });
+    priceWrap.appendChild(pMax);
+    row1.appendChild(priceWrap);
+
+    // 排序
+    var sortWrap = el('label', 'xy-filter-item xy-filter-item-grow');
+    sortWrap.appendChild(el('span', 'xy-filter-label', '排序'));
+    var sel = document.createElement('select');
+    sel.className = 'xy-filter-select';
+    SORT_OPTIONS.forEach(function (o) {
+      var op = document.createElement('option');
+      op.value = o[0];
+      op.textContent = o[1];
+      if (o[0] === filterState.sort) op.selected = true;
+      sel.appendChild(op);
+    });
+    sel.addEventListener('change', function () {
+      filterState.sort = sel.value;
+      render();
+    });
+    sel.addEventListener('click', function (e) { e.stopPropagation(); });
+    sortWrap.appendChild(sel);
+    row1.appendChild(sortWrap);
+
+    box.appendChild(row1);
+
+    // 提示：哪些数据在列表页拿不到。
+    // 浏览量在列表卡片上**不显示**（实测卡片文本里没有「浏览」），
+    // 只有补完详情后才有（详情接口的 browseCnt）。
+    // 不说清楚的话，用户选「浏览量排序」发现顺序没变，会以为功能坏了。
+    var tip = '想要人数来自卡片上的「N 人想要」，列表页就有；'
+      + '浏览量列表页没有，补完详情才有。';
+    box.appendChild(el('div', 'xy-filter-tip', tip));
+
+    // —— 第二行：操作按钮 ——
+    var row2 = el('div', 'xy-filter-row xy-filter-ops');
+    var bPick = btn('筛选并勾选', 'filter-pick');
+    bPick.title = '按上面的条件重新勾选（会取消之前不符合的勾选）';
+    row2.appendChild(bPick);
+    var bAdd = btn('追加勾选', 'filter-add');
+    bAdd.title = '保留原有勾选，只把符合条件的补勾上';
+    row2.appendChild(bAdd);
+    var bClear = btn('清空条件', 'filter-clear');
+    row2.appendChild(bClear);
+    box.appendChild(row2);
+
+    body.appendChild(box);
+  }
+
   function renderListTools(body) {
     var head = el('div', 'xy-list-head');
     var count = el('span', 'xy-name',
@@ -1450,6 +1722,8 @@
     ops.appendChild(btn('反选', 'sel-inv'));
     head.appendChild(ops);
     body.appendChild(head);
+
+    renderFilterBar(body);
 
     if (cardList.length) {
       var phead = el('div', 'xy-pick-head',
@@ -1640,6 +1914,17 @@
 
     if (act === 'sel-all') { selectAll(true); toast('已全选 ' + cardList.length + ' 个'); return; }
     if (act === 'sel-none') { selectAll(false); toast('已清空勾选'); return; }
+    if (act === 'filter-pick') { applyFilter(false); return; }
+    if (act === 'filter-add') { applyFilter(true); return; }
+    if (act === 'filter-clear') {
+      filterState.wantMin = '';
+      filterState.priceMin = '';
+      filterState.priceMax = '';
+      filterState.sort = 'default';
+      toast('筛选条件已清空');
+      render();
+      return;
+    }
     if (act === 'sel-inv') {
       var n = 0;
       cardList.forEach(function (c) {

@@ -70,6 +70,42 @@
     return Number(m[2]) > Number(m[1]);
   };
 
+  /**
+   * 这个价格值是不是来自 skuList（单位是「分」）。
+   *
+   * 判断依据：skuList 里有同名同值的 price，且商品级价格字段（soldPrice/price）
+   * 并不等于它。两条都对上才认定为「分」——宁可漏判也不要误判，
+   * 因为误判会把正常价格除以 100（比如 9.90 → 0.10），比大 100 倍更糟。
+   */
+  function priceIsCentLike(price, data) {
+    try {
+      var p = String(price).replace(/[^\d.]/g, '');
+      if (!p || !/^\d+(\.\d+)?$/.test(p)) return false;
+      var num = Number(p);
+      // 商品级价格字段存在且等于它 → 这是元，不是分
+      var it = data && data.itemDO;
+      if (it) {
+        var direct = it.soldPrice != null ? it.soldPrice : it.price;
+        if (direct != null && String(direct).replace(/[^\d.]/g, '') === p) return false;
+      }
+      // 去 skuList 里找同值
+      var list = (it && it.skuList) || (it && it.idleItemSkuList) ||
+        (data && data.skuList) || null;
+      if (!Array.isArray(list)) return false;
+      for (var i = 0; i < list.length; i++) {
+        var s = list[i] || {};
+        var sp = s.price != null ? s.price : s.priceInCent;
+        if (sp != null && String(sp).replace(/[^\d.]/g, '') === p) {
+          // skuList 的 price 是整数（分）才可信；带小数的基本是元
+          return Math.floor(num) === num && num >= 100;
+        }
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
   U.formatPrice = function (v) {
     if (v == null || v === '') return '';
     var s = String(v).trim();
@@ -85,6 +121,46 @@
   };
 
   /* ---------------- 图片 URL 处理 ---------------- */
+
+  /**
+   * 从一张商品卡片的文字里读「想要人数」。
+   *
+   * 闲鱼列表卡片上写的是「29人想要」「29 人想要」这类（2026-10-28 实测）。
+   * 这是「按想要人数筛选」能**立刻**出结果的关键 ——
+   * 不用等补详情（30 秒/件）。
+   *
+   * 注意只在自己的卡片范围内找，不要搜整页，否则会串到别的商品。
+   */
+  U.cardWantNum = function (scope) {
+    try {
+      if (!scope) return '';
+      var text = (scope.innerText || scope.textContent || '');
+      if (!text) return '';
+      var m = text.match(/(\d+(?:\.\d+)?)\s*人想要/);
+      if (m) return String(Math.floor(Number(m[1])));
+      m = text.match(/想要\s*(\d+)/);
+      if (m) return String(m[1]);
+      m = text.match(/(\d+)\s*想要/);
+      if (m) return String(m[1]);
+      return '';
+    } catch (e) {
+      return '';
+    }
+  };
+
+  /** 从一张商品卡片的文字里读「浏览量」："1268浏览" / "1268 次浏览" */
+  U.cardBrowseNum = function (scope) {
+    try {
+      if (!scope) return '';
+      var text = (scope.innerText || scope.textContent || '');
+      if (!text) return '';
+      var m = text.match(/(\d+(?:\.\d+)?)\s*(?:次|人)?浏览/);
+      if (m) return String(Math.floor(Number(m[1])));
+      return '';
+    } catch (e) {
+      return '';
+    }
+  };
 
   /**
    * 规范化图片地址
@@ -829,6 +905,10 @@
         price: U.cardPrice(scope, site.field && site.field.price, site.priceIsRange),
         image: U.cardImage(scope, site.field && site.field.image, site.imageUpgrade),
         sellerNick: U.cardField(scope, site.field && site.field.shop),
+        // 想要人数 / 浏览量：闲鱼列表卡片上写着「N 人想要」「N 浏览」，
+        // 直接从卡片的文字里读，不用等补详情（详情接口的字段叫 wantCnt/browseCnt）。
+        wantNum: U.cardWantNum(scope),
+        browseNum: U.cardBrowseNum(scope),
         url: itemUrl(id),
         source: 'dom'
       });
@@ -908,15 +988,43 @@
     for (var i = 0; i < nodes.length; i++) {
       var raw = textOf(nodes[i]);
       if (!raw || raw.length > 30) continue;
-      var t = isRange ? U.firstPrice(raw) : raw.replace(/[^\d.]/g, '');
+      // ⚠️⚠️ 闲鱼卡片的价格元素里**混着别的数字**（2026-10-28 实测）：
+      //   "¥\n69\n.90"      → 一个价格 69.90，被 CSS 拆成三行
+      //   "¥\n45\n¥120"     → **两个**价格（划线价 45 / 现价 120）
+      //   "¥1855人想要"     → 价格 18 与「55人想要」**粘在一起**
+      //
+      //   旧写法 `raw.replace(/[^\d.]/g,'')` 把所有非数字字符删掉再拼，
+      //   于是 "¥\n45\n¥120" → "45120"、"¥1855人想要" → "1855"
+      //   —— 价格凭空大了 100 倍，或者把小价格拼成大的。
+      //   价格是筛选/排序的核心维度，差 100 倍会直接筛错，所以必须修。
+      //
+      //   修法：
+      //     ① 含「人想要 / 想要 / 浏览」字样的节点直接跳过 ——
+      //        那是价格区的**描述**元素（"55人想要"），不是价格本身。
+      //        曾经在文本里用正则剔除「N人想要」，结果正则贪婪，
+      //        把 "¥9.9040人想要" 里的 "9040人想要" 整段吃掉，
+      //        价格变成 "9.9" —— 改成跳过整个节点就不会有边界问题。
+      //     ② 去掉换行/空格 —— 让被 CSS 拆行的数字重新连起来
+      //     ③ 取剩下的第一个数字（两个价格时取第一个，行为稳定）
+      if (/人想要|想要|浏览/.test(raw)) continue;
+      var flat = String(raw).replace(/\s+/g, '');
+      var t;
+      if (isRange) {
+        t = U.firstPrice(flat);
+      } else {
+        var m = flat.match(/\d+(?:\.\d{1,2})?/);
+        t = m ? m[0] : '';
+      }
       if (t && /^\d+(\.\d{1,2})?$/.test(t)) return t;
     }
     return '';
   };
 
   // 区间价 "18.90-25.00" / "¥18.90起" 取下限
+  // ⚠️ 同样要先去空白：价格常被 CSS 拆成多行（"¥\n18\n.90-25\n.00"），
+  //    不去空白的话正则会在 "18" 处断开，取到错的值。
   U.firstPrice = function (raw) {
-    var s = String(raw == null ? '' : raw).trim();
+    var s = String(raw == null ? '' : raw).replace(/\s+/g, '');
     var m = s.match(/(\d+(?:\.\d{1,2})?)/);
     return m ? m[1] : '';
   };
@@ -1025,14 +1133,27 @@
     // 价格：淘宝给的是 priceText（"4.01"）这种带小数的字符串。
     // 兜底深搜必须限制成「字符串/数字」——否则会捞到 price 对象
     // （{priceMoney, priceText, priceTitle}），String(对象) 出来是垃圾。
+    //
+    // ⚠️⚠️ 深搜价格有个坑（2026-10-28 发现）：
+    //   闲鱼的 **skuList[].price 是「分」**（4990 = 49.90 元），
+    //   而商品级的 soldPrice 是「元」（"9.90"）。
+    //   深搜先命中的往往是 skuList 里的分值 → 价格凭空大了 100 倍。
+    //   价格是筛选/排序的关键维度，差 100 倍会直接筛错，
+    //   所以这里把深搜限制在「不含 skuList 的部分」。
     var price = grab(
-      ['itemDO.price', 'itemDetailDO.itemDO.price', 'price', 'itemDO.priceShow', 'soldPrice'],
+      ['itemDO.soldPrice', 'itemDO.price', 'itemDetailDO.itemDO.price', 'price',
+        'itemDO.priceShow', 'soldPrice'],
       ['price', 'soldprice'],
       function (v) {
         return (typeof v === 'string' || typeof v === 'number') && String(v).trim() !== '';
       },
       'price'
     );
+    // 深搜命中 skuList 的分值时，按分换算回元
+    if (price != null && priceIsCentLike(price, data)) {
+      var pn = Number(String(price).replace(/[^\d.]/g, ''));
+      if (isFinite(pn) && pn >= 100) price = (pn / 100).toFixed(2);
+    }
 
     var imagesRaw = grab(
       ['itemDO.imageInfos', 'itemDetailDO.itemDO.imageInfos', 'itemDO.images', 'images', 'itemDO.picList'],
@@ -1068,8 +1189,33 @@
       isStr
     ) || '';
 
-    var want = grab(['itemDO.wantNum', 'itemDO.favorCount', 'wantNum'], ['wantnum', 'favorcount'], function (v) { return v != null; });
-    var browse = grab(['itemDO.browseNum', 'itemDO.viewCount', 'browseNum'], ['browsenum', 'viewcount'], function (v) { return v != null; });
+    // ⚠️⚠️ 闲鱼的字段名是 **wantCnt / browseCnt**（带 Cnt 后缀），
+    //   不是 wantNum / browseNum。写错的后果很隐蔽：接口**确实有**这个数据，
+    //   但提取时按错的名字找 → 永远取不到 → 「想要人数」类筛选功能
+    //   永远筛不出东西，而且没有任何报错。
+    //   （2026-10-28 实测 itemDO：wantCnt=1、wantCntUnit='人想要'、browseCnt=42）
+    //   所以这里把两套名字都列上，谁有算谁。
+    var want = grab(
+      ['itemDO.wantCnt', 'itemDO.wantNum', 'itemDO.favorCount', 'wantCnt', 'wantNum'],
+      ['wantcnt', 'wantnum', 'favorcount'],
+      function (v) { return v != null && String(v) !== ''; }
+    );
+    var browse = grab(
+      ['itemDO.browseCnt', 'itemDO.browseNum', 'itemDO.viewCount', 'browseCnt', 'browseNum'],
+      ['browsecnt', 'browsenum', 'viewcount'],
+      function (v) { return v != null && String(v) !== ''; }
+    );
+    // 收藏数与已售数：筛选/排序的备用维度，各站不一定给，取不到就空着
+    var favor = grab(
+      ['itemDO.favorCnt', 'itemDO.collectCnt', 'itemDO.interactFavorCnt', 'favorCnt'],
+      ['favormcnt', 'favorcnt', 'collectcnt'],
+      function (v) { return v != null && String(v) !== ''; }
+    );
+    var sold = grab(
+      ['itemDO.soldCnt', 'itemDO.soldCount', 'soldCnt'],
+      ['soldcnt', 'soldcount'],
+      function (v) { return v != null && String(v) !== ''; }
+    );
     var publishTime = grab(['itemDO.publishTime', 'itemDO.gmtCreate', 'publishTime'], ['publishtime', 'gmtcreate'], function (v) { return v != null; });
 
     if (!title && !images.length && !itemId) return null;
@@ -1086,6 +1232,8 @@
       location: String(location || '').trim(),
       wantNum: want == null ? '' : String(want),
       browseNum: browse == null ? '' : String(browse),
+      favorNum: favor == null ? '' : String(favor),
+      soldNum: sold == null ? '' : String(sold),
       publishTime: publishTime ? String(publishTime) : '',
       url: itemId ? itemUrl(itemId) : (global.location ? global.location.href : ''),
       // 主图视频。详情页接口基本不带视频，DOM 分支才是主力；

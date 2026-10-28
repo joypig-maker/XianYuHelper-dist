@@ -424,3 +424,84 @@
   overflow: hidden;
 }
 .xy-sg-price { font-size: 13px; font-weight: 600; color: #ff4000; margin-top: 3px; }
+
+/* ---- 筛选与排序 ----
+ * 放在列表工具区（跟全选/反选同一层），因为这是每次选货都要用的高频动作，
+ * 不该藏在设置面板里。 */
+.xy-filter {
+  margin: 6px 0 8px;
+  padding: 7px 8px;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: #f5f9ff;
+}
+
+.xy-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.xy-filter-ops { margin-top: 6px; }
+.xy-filter-ops .xy-btn { flex: 1; padding: 4px 2px; font-size: 11px; }
+
+.xy-filter-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: #5b6472;
+}
+
+.xy-filter-item-grow { flex: 1; min-width: 96px; }
+
+.xy-filter-label { white-space: nowrap; }
+
+.xy-filter-input {
+  width: 46px;
+  padding: 3px 4px;
+  font-size: 11px;
+  border: 1px solid #d9dde3;
+  border-radius: 4px;
+  background: #fff;
+  color: #1f2329;
+}
+.xy-filter-input-w { width: 40px; }
+.xy-filter-input:focus {
+  outline: none;
+  border-color: #4096ff;
+  box-shadow: 0 0 0 2px rgba(64, 150, 255, 0.15);
+}
+.xy-filter-input::-webkit-outer-spin-button,
+.xy-filter-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.xy-filter-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+
+.xy-filter-sep { color: #86909c; }
+
+.xy-filter-select {
+  flex: 1;
+  min-width: 0;
+  padding: 3px 4px;
+  font-size: 11px;
+  border: 1px solid #d9dde3;
+  border-radius: 4px;
+  background: #fff;
+  color: #1f2329;
+  cursor: pointer;
+}
+.xy-filter-select:focus {
+  outline: none;
+  border-color: #4096ff;
+  box-shadow: 0 0 0 2px rgba(64, 150, 255, 0.15);
+}
+
+.xy-pick-want { color: #ff8f00; }
+.xy-pick-browse { color: #86909c; }
+
+.xy-filter-tip {
+  margin-top: 5px;
+  font-size: 10px;
+  line-height: 1.5;
+  color: #86909c;
+}

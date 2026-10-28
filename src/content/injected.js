@@ -81,7 +81,13 @@
         // 已有则只补空缺字段，不被空的覆盖
         var merged = {};
         Object.keys(old).forEach(function (k) { merged[k] = old[k]; });
-        ['title', 'price', 'image', 'sellerNick'].forEach(function (k) {
+        // ★ wantNum / browseNum 也要在补空列表里（2026-10-28 加）。
+        //   这两个字段有**两个来源**，谁先到不一定：
+        //     · 详情接口的 wantCnt / browseCnt（补详情后才有）
+        //     · 列表卡片 DOM 上的「N 人想要」「N 浏览」（列表页就有）
+        //   不列进来的话，先到的那份若为空，后到的那份就被丢掉了 ——
+        //   而两份合起来才是完整数据，筛选和排序都靠它。
+        ['title', 'price', 'image', 'sellerNick', 'wantNum', 'browseNum'].forEach(function (k) {
           if (!(String(merged[k] || '').trim()) && String(c[k] || '').trim()) merged[k] = c[k];
         });
         // images 也得跟着补：collectCards 现在会产出多图，
@@ -1003,6 +1009,50 @@
     return String(el.textContent || '').trim().slice(0, 40);
   }
 
+  /**
+   * 从 DOM 文本里读「想要人数」。
+   *
+   * 为什么需要它：闲鱼的**列表接口不一定给 wantCnt**，
+   * 但页面上「N 人想要」这段字是**看得见摸得着**的
+   * （2026-10-28 实测详情页：`.want--ecByv3Sr` → "29人想要 1268浏览"）。
+   * DOM 这条路能立刻拿到数据，不必等补详情（30 秒/件）。
+   *
+   * 兼容多种写法："29人想要" / "29 人想要" / "想要 29" / "29想要"
+   */
+  function wantNumFromText(scope) {
+    try {
+      var root = scope || document;
+      var text = (root.innerText || root.textContent || '');
+      if (!text) return '';
+      var m = text.match(/(\d+(?:\.\d+)?)\s*人想要/);
+      if (m) return String(Math.floor(Number(m[1])));
+      m = text.match(/想要\s*(\d+)/);
+      if (m) return String(m[1]);
+      m = text.match(/(\d+)\s*想要/);
+      if (m) return String(m[1]);
+      return '';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  /**
+   * 从 DOM 文本里读「浏览量」。
+   * 写法比想要人数杂："1268浏览" / "1268 次浏览" / "1268人浏览过"
+   */
+  function browseNumFromText(scope) {
+    try {
+      var root = scope || document;
+      var text = (root.innerText || root.textContent || '');
+      if (!text) return '';
+      var m = text.match(/(\d+(?:\.\d+)?)\s*(?:次|人)?浏览/);
+      if (m) return String(Math.floor(Number(m[1])));
+      return '';
+    } catch (e) {
+      return '';
+    }
+  }
+
   function domFallback() {
     if (!SITE) return null;
     var dm = SITE.detailDom || {};
@@ -1189,8 +1239,10 @@
       sellerId: sellerId,
       sellerUrl: sellerUrlOf(sellerId),
       location: '',
-      wantNum: '',
-      browseNum: '',
+      // 详情页 DOM 上也写着「N 人想要」「N 浏览」（实测 .want--ecByv3Sr），
+      // 顺手读出来，筛选和排序就能直接用，不用等接口。
+      wantNum: wantNumFromText(),
+      browseNum: browseNumFromText(),
       publishTime: '',
       skus: skus || null,
       videos: videos,
