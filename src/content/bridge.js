@@ -1244,15 +1244,18 @@
 
     if (wMin != null) {
       var w = wantOf(d);
-      // ★ 缺数据时**不判为不符合**，而是单独标记 ——
-      //   否则用户会看到「填了想要人数，结果一个都没选上」，
-      //   根本不知道是因为闲鱼没给这个数。
-      if (w == null) return { ok: true, missing: 'want' };
+      // ★ 缺数据 = **不符合**，不勾选（2026-10-28 用户反馈修正）。
+      //   原来这里返回 ok:true（缺数据也勾上），理由是「怕用户以为功能坏了」——
+      //   但那是把「不知道」变成了「勾上一堆用户明确不想要的」。
+      //   用户填「想要人数 > 10」的意思很明确：只要够 10 的。
+      //   闲鱼确实有些商品不显示想要人数（实测推荐位 8 个里 2 个没有），
+      //   这些必须排除，并把数量说清楚（见 applyFilter 的提示）。
+      if (w == null) return { ok: false, missing: 'want', reason: '无想要人数数据' };
       if (w < wMin) return { ok: false, reason: '想要人数 ' + w + ' < ' + wMin };
     }
     if (pMin != null || pMax != null) {
       var p = priceOf(d);
-      if (p == null) return { ok: true, missing: 'price' };
+      if (p == null) return { ok: false, missing: 'price', reason: '无价格数据' };
       if (pMin != null && p < pMin) return { ok: false, reason: '价格 ' + p + ' < ' + pMin };
       if (pMax != null && p > pMax) return { ok: false, reason: '价格 ' + p + ' > ' + pMax };
     }
@@ -1285,12 +1288,53 @@
   }
 
   /**
+   * 只补「缺想要人数」的商品详情，补完再筛一次。
+   *
+   * 为什么需要：闲鱼有些商品卡片上不显示「N 人想要」（实测推荐位 8 个里 2 个没有），
+   * 但**详情接口是给的**（itemDO.wantCnt）。补齐详情就能拿到，
+   * 筛出来的结果才准。
+   *
+   * 只补详情不下载 —— 补完直接重新筛选，让用户自己决定要不要下。
+   */
+  async function fillMissingDetails() {
+    var wantMin = numOf(filterState.wantMin);
+    var need = cardList.filter(function (c) {
+      if (!c || !c.itemId) return false;
+      if (wantMin != null && wantOf(effData(c.itemId)) != null) return false;
+      if (wantMin == null && priceOf(effData(c.itemId)) != null) return false;
+      return true;
+    }).map(function (c) { return c.itemId; });
+    if (!need.length) {
+      toast('没有需要补详情的商品');
+      return;
+    }
+    toast('正在补齐 ' + need.length + ' 个商品的详情，约 ' +
+      Math.ceil(need.length / 3) * 30 + ' 秒');
+    var BATCH = 20;
+    for (var i = 0; i < need.length; i += BATCH) {
+      var part = need.slice(i, i + BATCH);
+      try {
+        await askInjected('ensure-cards', { ids: part }, { timeout: 5 * 60 * 1000 });
+      } catch (e) {
+        console.warn('[闲鱼助手] 补齐详情中断：', e);
+        break;
+      }
+      toast('已补 ' + Math.min(i + BATCH, need.length) + '/' + need.length + '，继续…');
+    }
+    toast('补齐完成，已按当前条件重新筛选');
+    render();
+    // 补完后自动重新执行一次筛选，结果立刻可见
+    applyFilter(false);
+  }
+
+  /**
    * 按条件筛选并勾选。
    * @param {boolean} append true = 只追加勾选符合条件的；false = 重置为只勾符合条件的
    */
   function applyFilter(append) {
-    var hit = 0, miss = [];
+    var hit = 0;
     var missingWant = 0, missingPrice = 0;
+    var belowWant = 0, outOfPrice = 0;
     if (!append) {
       // 重置：先全不选
       cardList.forEach(function (c) {
@@ -1304,14 +1348,30 @@
         selected[c.itemId] = 1;
         syncCheckUI(c.itemId, true);
         hit++;
-        if (r.missing === 'want') missingWant++;
-        if (r.missing === 'price') missingPrice++;
+        return;
       }
+      // 统计没勾上的原因，让提示能说清楚「为什么少了」
+      if (r.missing === 'want') missingWant++;
+      else if (r.missing === 'price') missingPrice++;
+      else if (/想要人数/.test(r.reason || '')) belowWant++;
+      else if (/价格/.test(r.reason || '')) outOfPrice++;
     });
     renderCount();
-    var msg = '已勾选 ' + hit + ' 个';
-    if (missingWant) msg += '（' + missingWant + ' 个缺想要人数，未参与筛选）';
-    if (missingPrice) msg += '（' + missingPrice + ' 个缺价格，未参与筛选）';
+
+    // 提示要能回答用户最可能问的三个问题：
+    //   勾了几个？为什么有的没勾上？缺数据的是不是功能坏了？
+    var msg = '已勾选 ' + hit + ' 个（共 ' + cardList.length + ' 个）';
+    var parts = [];
+    if (belowWant) parts.push(belowWant + ' 个想要人数不够');
+    if (outOfPrice) parts.push(outOfPrice + ' 个价格不在区间');
+    if (missingWant) parts.push(missingWant + ' 个没有想要人数数据');
+    if (missingPrice) parts.push(missingPrice + ' 个没有价格数据');
+    if (parts.length) {
+      msg += '，未勾选 ' + parts.join('、');
+      if (missingWant) {
+        msg += '。缺想要人数的可以点「补齐详情」再筛一次';
+      }
+    }
     toast(msg);
     render();
   }
@@ -1690,9 +1750,11 @@
     // 提示：哪些数据在列表页拿不到。
     // 浏览量在列表卡片上**不显示**（实测卡片文本里没有「浏览」），
     // 只有补完详情后才有（详情接口的 browseCnt）。
+    // 想要人数同理：有些商品卡片上不写「N 人想要」，
+    // 但详情接口是给的（itemDO.wantCnt）。
     // 不说清楚的话，用户选「浏览量排序」发现顺序没变，会以为功能坏了。
     var tip = '想要人数来自卡片上的「N 人想要」，列表页就有；'
-      + '浏览量列表页没有，补完详情才有。';
+      + '有个别商品不显示，可点「补齐详情」再筛。';
     box.appendChild(el('div', 'xy-filter-tip', tip));
 
     // —— 第二行：操作按钮 ——
@@ -1703,6 +1765,9 @@
     var bAdd = btn('追加勾选', 'filter-add');
     bAdd.title = '保留原有勾选，只把符合条件的补勾上';
     row2.appendChild(bAdd);
+    var bFill = btn('补齐详情', 'filter-fill');
+    bFill.title = '有些商品卡片上不显示「N 人想要」，但详情接口有。补齐后再筛一次更准（较慢）';
+    row2.appendChild(bFill);
     var bClear = btn('清空条件', 'filter-clear');
     row2.appendChild(bClear);
     box.appendChild(row2);
@@ -1916,6 +1981,7 @@
     if (act === 'sel-none') { selectAll(false); toast('已清空勾选'); return; }
     if (act === 'filter-pick') { applyFilter(false); return; }
     if (act === 'filter-add') { applyFilter(true); return; }
+    if (act === 'filter-fill') { fillMissingDetails(); return; }
     if (act === 'filter-clear') {
       filterState.wantMin = '';
       filterState.priceMin = '';

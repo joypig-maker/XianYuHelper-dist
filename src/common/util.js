@@ -663,6 +663,23 @@
     return [];
   }
 
+  /**
+   * 从一个节点上按候选字段名取数值（想要人数、浏览量这类）。
+   * 取不到返回 ''（表示「没有数据」，不是 0）。
+   */
+  function pickNum(node, keys) {
+    try {
+      if (!node) return '';
+      for (var i = 0; i < keys.length; i++) {
+        var v = node[keys[i]];
+        if (v == null || v === '') continue;
+        var n = Number(String(v).replace(/[^\d.]/g, ''));
+        if (isFinite(n)) return String(Math.floor(n));
+      }
+    } catch (e) {}
+    return '';
+  }
+
   U.collectCards = function (root, opts) {
     if (!root || typeof root !== 'object') return [];
     opts = opts || {};
@@ -753,6 +770,11 @@
           node.userNick || node.nick || node.sellerNick || node.shopName ||
           seller.userNick || seller.nick || ''
         ).trim(),
+        // 想要人数 / 浏览量：列表接口给了就用（闲鱼叫 wantCnt / browseCnt），
+        // 没给就留空 —— 后面 DOM 扫描那轮会补上「N 人想要」的文字。
+        // 两条路都要有：接口先到、DOM 后到时靠 mergeCards 的「补空」合并。
+        wantNum: pickNum(node, ['wantCnt', 'wantNum', 'favorCnt']),
+        browseNum: pickNum(node, ['browseCnt', 'browseNum', 'viewCnt']),
         url: itemUrl(id)
       };
     }

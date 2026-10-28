@@ -125,6 +125,20 @@ section('3b) ★★★ 卡片价格：实测踩到的三种形态');
 /* ============================================================ */
 section('4) ★★★ 合并时不能把 wantNum/browseNum 丢掉');
 {
+  // 接口路径的卡片也必须带 wantNum —— 列表接口给 wantCnt 时能直接用
+  const r = U.collectCards(
+    { items: [{ itemId: '844934128301', title: '测试商品', price: '9.90',
+                wantCnt: 220, browseCnt: 42 }] }, { site: null });
+  is('★ 接口路径的卡片也带 wantNum', r[0] && r[0].wantNum === '220',
+    r[0] && String(r[0].wantNum));
+  is('★ 接口路径的卡片也带 browseNum', r[0] && r[0].browseNum === '42',
+    r[0] && String(r[0].browseNum));
+  const r2 = U.collectCards(
+    { items: [{ itemId: '844934128302', title: '测试商品2' }] }, { site: null });
+  is('★ 接口没给时留空（不是 0）', r2[0] && r2[0].wantNum === '',
+    r2[0] && JSON.stringify(r2[0].wantNum));
+}
+{
   is('★ mergeCards 的补空列表含 wantNum/browseNum',
     /'title', 'price', 'image', 'sellerNick', 'wantNum', 'browseNum'/.test(IJ),
     (IJ.match(/'title', 'price'[^]]*\]/) || [''])[0]);
@@ -140,9 +154,15 @@ section('5) ★★ 筛选逻辑');
   is('★ 想要人数用 ≥ 语义（wantMin）', /w < wMin/.test(fn));
   is('★ 价格区间上下限都判断',
     /p < pMin/.test(fn) && /p > pMax/.test(fn));
-  is('★★ 缺数据不算「不符合」，而是标记 missing',
-    /return \{ ok: true, missing: 'want' \}/.test(fn) &&
-    /return \{ ok: true, missing: 'price' \}/.test(fn));
+  // ★ 2026-10-28 用户反馈修正：缺数据必须**不算符合**。
+  //   原来返回 ok:true（缺数据也勾上），用户反馈「勾了想要人数大于10，
+  //   但很多无想要人数的商品也勾选了」——把不知道变成了勾上一堆不想要的。
+  is('★★★ 缺想要人数 → 不符合，不勾选',
+    /return \{ ok: false, missing: 'want'/.test(fn), (fn.match(/return \{ ok: false, missing: 'want'[^}]*\}/) || [''])[0]);
+  is('★★★ 缺价格 → 不符合，不勾选',
+    /return \{ ok: false, missing: 'price'/.test(fn));
+  is('★ 缺数据不勾但要单独统计（提示里说清数量）',
+    /missingWant\+\+|missingWant \+=/.test(BR) || /if \(missingWant\)/.test(BR));
   is('★ 缺数据与 0 区分（wantOf 返回 null 而不是 0）',
     /function wantOf\(d\)/.test(BR));
   is('★ 空值 = 不限（numOf 空串返回 null）',
@@ -175,6 +195,10 @@ section('7) ★★ 界面');
   is('★ 有「筛选并勾选」按钮', /'筛选并勾选'/.test(BR));
   is('★ 有「追加勾选」按钮', /'追加勾选'/.test(BR));
   is('★ 有「清空条件」按钮', /'清空条件'/.test(BR));
+  is('★★ 有「补齐详情」按钮（缺想要人数的补完再筛）',
+    /'补齐详情'/.test(BR) && /function fillMissingDetails/.test(BR));
+  is('★ 提示里区分「不够」与「没数据」',
+    /个想要人数不够/.test(BR) && /个没有想要人数数据/.test(BR));
   is('★ 筛选条在列表工具区里', /renderFilterBar\(body\);/.test(BR));
   is('★ 每行显示想要人数', /'人想要'/.test(BR));
   is('★ CSS 有筛选条样式', /\.xy-filter\s*\{/.test(
