@@ -1374,7 +1374,10 @@
    *
    * 只补详情不下载 —— 补完直接重新筛选，让用户自己决定要不要下。
    */
-  async function fillMissingDetails() {
+  async function fillMissingDetails(scope) {
+    // scope: 'heat' 只补缺热度的（为了筛选，快）
+    //        'all'  全部补（为了规格图/文案，慢）
+    var mode = scope || 'heat';
     // ★ 挑「缺数据」的商品（2026-10-31 修）。
     //   原来的写法是：有筛选条件就挑缺热度的，没筛选条件就挑缺价格的。
     //   结果集市商品**有价格**（列表页就给了），于是没填筛选条件时
@@ -1387,13 +1390,20 @@
     var need = cardList.filter(function (c) {
       if (!c || !c.itemId) return false;
       var d = effData(c.itemId);
-      if (heatOf(d) == null) return true;              // 缺想要人数 → 补
-      var sk = d.skus;
-      if (!sk || !sk.list || !sk.list.length) return true;  // 缺规格表 → 补
+      // 缺想要人数 → 补（集市/奥莱商品的卡片上没有「N人想要」，
+      //   只有详情接口的 wantCnt 才有）
+      if (heatOf(d) == null) return true;
+      // 「全部补」模式再把缺规格表的带上 —— 规格表和规格图也只在详情里
+      if (mode === 'all') {
+        var sk = d.skus;
+        if (!sk || !sk.list || !sk.list.length) return true;
+      }
       return false;
     }).map(function (c) { return c.itemId; });
     if (!need.length) {
-      toast('本页商品都已有想要人数和规格，无需补齐');
+      toast(mode === 'all'
+        ? '本页商品都已有想要人数和规格，无需补齐'
+        : '本页商品都已有想要人数，无需补齐');
       return;
     }
     toast('正在补齐 ' + need.length + ' 个商品的详情，约 ' +
@@ -1709,12 +1719,26 @@
    * 所以清单在浮层里自己列一遍商品，勾选状态跟页面复选框共用同一份
    * selected，下游的批量下载 / 保存文案 / 一键打包完全不用改。
    */
+  // 面板一次渲染多少行。
+  // ★ 原来是硬上限 60，滚动加载出来的商品**根本不进列表**（2026-10-31 用户报）：
+  //   「整店页向下滚动加载后插件端代码根本没有更新，只显示当前页面的，
+  //     向下更新的商品不显示，筛选并勾选压根没反应」。
+  //   桥接层其实一直在更新（实测「已勾选 100 个（共 100 个）」都对），
+  //   只是列表被截断了 —— 勾了 100 个，屏幕上只有 60 行，怎么看都像没反应。
+  // 改成：分批「显示更多」，并加「只看已勾选」——勾了什么立刻能核对。
   var PICK_LIMIT = 60;
+  var pickShown = 60;      // 当前显示多少行
+  var pickOnlyChecked = false;   // 只看已勾选
 
   function renderPicker(body) {
     var box = el('div', 'xy-pick');
     // 按当前排序显示
-    var list = sortedCards().slice(0, PICK_LIMIT);
+    var sorted = sortedCards();
+    // 「只看已勾选」：勾了什么立刻能核对，不用在一堆没勾的里面翻
+    if (pickOnlyChecked) {
+      sorted = sorted.filter(function (c) { return c && selected[c.itemId]; });
+    }
+    var list = sorted.slice(0, pickShown);
 
     list.forEach(function (c) {
       if (!c || !c.itemId) return;
@@ -1756,10 +1780,18 @@
       box.appendChild(row);
     });
 
-    if (cardList.length > PICK_LIMIT) {
-      box.appendChild(el('div', 'xy-pick-more',
-        '仅列出前 ' + PICK_LIMIT + ' 个，共识别 ' + cardList.length + ' 个，'
-        + '其余用「全选」批量勾选'));
+    // 显示更多：整店页上千件商品，一次全渲染会卡，所以分批加
+    var shownNow = list.length;
+    var totalNow = sorted.length;
+    if (totalNow > shownNow) {
+      var more = el('button', 'xy-pick-more', '显示更多（已显示 ' +
+        shownNow + ' / ' + totalNow + '）');
+      more.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        pickShown += 200;
+        render();
+      });
+      box.appendChild(more);
     }
     body.appendChild(box);
   }
@@ -1861,9 +1893,13 @@
     var bAdd = btn('追加勾选', 'filter-add');
     bAdd.title = '保留原有勾选，只把符合条件的补勾上';
     row2.appendChild(bAdd);
-    var bFill = btn('补齐详情', 'filter-fill');
-    bFill.title = '有些商品卡片上不显示「N 人想要」，但详情接口有。补齐后再筛一次更准（较慢）';
+    var bFill = btn('补热度', 'filter-fill');
+    bFill.title = '只补「缺想要人数」的商品（集市/奥莱商品的卡片上没有「N人想要」，'
+      + '但详情接口有）。补完再筛一次最准。每件约 5 秒。';
     row2.appendChild(bFill);
+    var bFillAll = btn('补全部', 'filter-fill-all');
+    bFillAll.title = '把本页所有商品的详情都补齐（含规格表、规格图、文案）。慢，但下载规格图需要。';
+    row2.appendChild(bFillAll);
     var bClear = btn('清空条件', 'filter-clear');
     row2.appendChild(bClear);
     box.appendChild(row2);
@@ -1908,6 +1944,21 @@
       var pcnt = el('span', 'xy-pick-count',
         '已勾选 ' + selectedIds().length + ' 个');
       phead.appendChild(pcnt);
+      // ★「只看已勾选」开关（2026-10-31 用户报「筛选并勾选压根没反应」）：
+      //   整店页上千件商品时，列表一屏放不下，
+      //   勾完之后想核对「到底勾了哪些」得翻半天。
+      //   这个开关一键只看勾中的。
+      var onlyBtn = el('button', 'xy-pick-only' +
+        (pickOnlyChecked ? ' xy-pick-only-on' : ''),
+        pickOnlyChecked ? '✓ 只看已勾选' : '只看已勾选');
+      onlyBtn.title = pickOnlyChecked ? '点击：显示全部商品' : '点击：只显示已勾选的商品';
+      onlyBtn.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        pickOnlyChecked = !pickOnlyChecked;
+        pickShown = 60;
+        render();
+      });
+      phead.appendChild(onlyBtn);
       body.appendChild(phead);
       renderPicker(body);
     }
@@ -2093,7 +2144,8 @@
     if (act === 'sel-none') { selectAll(false); toast('已清空勾选'); return; }
     if (act === 'filter-pick') { applyFilter(false); return; }
     if (act === 'filter-add') { applyFilter(true); return; }
-    if (act === 'filter-fill') { fillMissingDetails(); return; }
+    if (act === 'filter-fill') { fillMissingDetails('heat'); return; }
+    if (act === 'filter-fill-all') { fillMissingDetails('all'); return; }
     if (act === 'filter-clear') {
       filterState.wantMin = '';
       filterState.priceMin = '';

@@ -184,7 +184,8 @@ section('6) ★★ 排序逻辑');
   is('★ 支持浏览量排序', /else if \(key === 'browse'\)/.test(BR));
   is('★★ 缺数据的沉到末尾（不混在中间）',
     /if \(va == null\) return 1;/.test(BR) && /if \(vb == null\) return -1;/.test(BR));
-  is('★ 渲染列表用排序后的结果', /var list = sortedCards\(\)/.test(BR));
+  is('★ 渲染列表用排序后的结果',
+    /var sorted = sortedCards\(\)/.test(BR) && /sorted\.slice\(0, pickShown\)/.test(BR));
   is('★ 排序选项齐全',
     /'default'/.test(BR) && /'want'/.test(BR) && /'browse'/.test(BR));
 }
@@ -200,12 +201,23 @@ section('7) ★★ 界面');
   is('★ 有「筛选并勾选」按钮', /'筛选并勾选'/.test(BR));
   is('★ 有「追加勾选」按钮', /'追加勾选'/.test(BR));
   is('★ 有「清空条件」按钮', /'清空条件'/.test(BR));
-  is('★★ 有「补齐详情」按钮（缺想要人数的补完再筛）',
-    /'补齐详情'/.test(BR) && /function fillMissingDetails/.test(BR));
+  is('★★ 有「补热度」按钮（只补缺想要人数的，快）',
+    /'补热度'/.test(BR) && /function fillMissingDetails/.test(BR) &&
+    /fillMissingDetails\('heat'\)/.test(BR));
+  is('★★ 有「补全部」按钮（含规格表，慢但下载规格图需要）',
+    /'补全部'/.test(BR) && /fillMissingDetails\('all'\)/.test(BR));
+  is('★★ 补详情的两种范围分开：heat 只补缺热度的',
+    /if \(heatOf\(d\) == null\) return true;/.test(BR) &&
+    /if \(mode === 'all'\)/.test(BR));
   is('★ 提示里区分「不够」与「没数据」',
     /个热度不够/.test(BR) && /个没有热度数据/.test(BR));
   is('★ 筛选条在列表工具区里', /renderFilterBar\(body\);/.test(BR));
   is('★ 每行显示想要人数', /'人想要'/.test(BR));
+  is('★★ 面板列表不再硬截断（分批「显示更多」）',
+    /var pickShown = 60/.test(BR) && /pickShown \+= 200/.test(BR) &&
+    /xy-pick-more/.test(BR));
+  is('★★ 有「只看已勾选」开关',
+    /pickOnlyChecked/.test(BR) && /xy-pick-only/.test(BR));
   is('★ CSS 有筛选条样式', /\.xy-filter\s*\{/.test(
     fs.readFileSync(path.join(ROOT, 'src/content/panel.css'), 'utf8')));
 }
