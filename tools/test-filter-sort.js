@@ -163,6 +163,11 @@ section('5) ★★ 筛选逻辑');
     /return \{ ok: false, missing: 'price'/.test(fn));
   is('★ 缺数据不勾但要单独统计（提示里说清数量）',
     /missingWant\+\+|missingWant \+=/.test(BR) || /if \(missingWant\)/.test(BR));
+  is('★★ 有 cardBargainNum（闲鱼的「N人小刀价」是另一个热度指标）',
+    /U\.cardBargainNum = function/.test(
+      fs.readFileSync(path.join(ROOT, 'src/common/util.js'), 'utf8')));
+  is('★★ 筛选用的是「热度」（想要人数优先，否则用议价热度）',
+    /function heatOf\(d\)/.test(BR) && /var w = heatOf\(d\)/.test(BR));
   is('★ 缺数据与 0 区分（wantOf 返回 null 而不是 0）',
     /function wantOf\(d\)/.test(BR));
   is('★ 空值 = 不限（numOf 空串返回 null）',
@@ -188,7 +193,7 @@ section('6) ★★ 排序逻辑');
 section('7) ★★ 界面');
 {
   is('★ 有筛选条渲染函数', /function renderFilterBar\(body\)/.test(BR));
-  is('★ 有「想要≥」输入框', /'想要≥'/.test(BR));
+  is('★ 有「热度≥」输入框（想要人数+议价热度合并）', /'热度≥'/.test(BR));
   is('★ 有价格区间两个输入框',
     /'低'/.test(BR) && /'高'/.test(BR));
   is('★ 有排序下拉', /document\.createElement\('select'\)/.test(BR));
@@ -198,7 +203,7 @@ section('7) ★★ 界面');
   is('★★ 有「补齐详情」按钮（缺想要人数的补完再筛）',
     /'补齐详情'/.test(BR) && /function fillMissingDetails/.test(BR));
   is('★ 提示里区分「不够」与「没数据」',
-    /个想要人数不够/.test(BR) && /个没有想要人数数据/.test(BR));
+    /个热度不够/.test(BR) && /个没有热度数据/.test(BR));
   is('★ 筛选条在列表工具区里', /renderFilterBar\(body\);/.test(BR));
   is('★ 每行显示想要人数', /'人想要'/.test(BR));
   is('★ CSS 有筛选条样式', /\.xy-filter\s*\{/.test(

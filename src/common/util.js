@@ -148,6 +148,31 @@
     }
   };
 
+  /**
+   * 从一张商品卡片的文字里读「议价热度」（闲鱼叫「N 人小刀价」）。
+   *
+   * 这是**和「N 人想要」并列的另一个热度指标**，不是一回事：
+   *   · 「N 人想要」  = 有 N 个人想要这件商品（收藏意向）
+   *   · 「N 人小刀价」= 有 N 个人在跟卖家砍价（议价意向）
+   * 两种卡片只会显示其中一种，所以只认「N人想要」的话，
+   * 有议价热度的商品会被当成「没有热度数据」丢掉。
+   * 单独提出来，筛选/排序时可以两个一起用。
+   */
+  U.cardBargainNum = function (scope) {
+    try {
+      if (!scope) return '';
+      var text = (scope.innerText || scope.textContent || '');
+      if (!text) return '';
+      var m = text.match(/(\d+(?:\.\d+)?)\s*人小刀价/);
+      if (m) return String(Math.floor(Number(m[1])));
+      m = text.match(/(\d+(?:\.\d+)?)\s*人(?:议价|砍价)/);
+      if (m) return String(Math.floor(Number(m[1])));
+      return '';
+    } catch (e) {
+      return '';
+    }
+  };
+
   /** 从一张商品卡片的文字里读「浏览量」："1268浏览" / "1268 次浏览" */
   U.cardBrowseNum = function (scope) {
     try {
@@ -931,6 +956,7 @@
         // 直接从卡片的文字里读，不用等补详情（详情接口的字段叫 wantCnt/browseCnt）。
         wantNum: U.cardWantNum(scope),
         browseNum: U.cardBrowseNum(scope),
+        bargainNum: U.cardBargainNum(scope),
         url: itemUrl(id),
         source: 'dom'
       });
@@ -1007,28 +1033,33 @@
     var sel = selectors || ['[class*=price]', '[class*=Price]'];
     var nodes;
     try { nodes = scope.querySelectorAll(sel.join(',')); } catch (e) { return ''; }
+    var selStr = sel.join(',');
     for (var i = 0; i < nodes.length; i++) {
-      var raw = textOf(nodes[i]);
+      var node = nodes[i];
+      var raw = textOf(node);
       if (!raw || raw.length > 30) continue;
-      // ⚠️⚠️ 闲鱼卡片的价格元素里**混着别的数字**（2026-10-28 实测）：
-      //   "¥\n69\n.90"      → 一个价格 69.90，被 CSS 拆成三行
-      //   "¥\n45\n¥120"     → **两个**价格（划线价 45 / 现价 120）
-      //   "¥1855人想要"     → 价格 18 与「55人想要」**粘在一起**
-      //
-      //   旧写法 `raw.replace(/[^\d.]/g,'')` 把所有非数字字符删掉再拼，
-      //   于是 "¥\n45\n¥120" → "45120"、"¥1855人想要" → "1855"
-      //   —— 价格凭空大了 100 倍，或者把小价格拼成大的。
-      //   价格是筛选/排序的核心维度，差 100 倍会直接筛错，所以必须修。
-      //
-      //   修法：
-      //     ① 含「人想要 / 想要 / 浏览」字样的节点直接跳过 ——
-      //        那是价格区的**描述**元素（"55人想要"），不是价格本身。
-      //        曾经在文本里用正则剔除「N人想要」，结果正则贪婪，
-      //        把 "¥9.9040人想要" 里的 "9040人想要" 整段吃掉，
-      //        价格变成 "9.9" —— 改成跳过整个节点就不会有边界问题。
-      //     ② 去掉换行/空格 —— 让被 CSS 拆行的数字重新连起来
-      //     ③ 取剩下的第一个数字（两个价格时取第一个，行为稳定）
-      if (/人想要|想要|浏览/.test(raw)) continue;
+
+      // ★ 跳过「容器」节点（2026-10-31 实测）。
+      //   闲鱼卡片的价格是**好几个兄弟节点**拼出来的：
+      //     row3-wrap-price  →  "¥138" + "2人小刀价"   ← 容器，两个都含
+      //       price-wrap     →  "¥138"                  ← 真正的价格
+      //       price-desc     →  "2人小刀价"              ← 描述，不是价格
+      //   容器节点的文本是两个兄弟粘在一起的（"¥1382人小刀价"），
+      //   靠正则猜不出边界。**用 DOM 结构区分才靠谱**：
+      //   内部还有别的 price 元素的，就是容器，跳过。
+      try {
+        if (node.querySelectorAll && node.querySelectorAll(selStr).length > 1) continue;
+      } catch (e2) {}
+
+      // 含「人想要 / 想要 / 浏览 / 小刀 / 议价」字样的是**描述**元素
+      //（"55人想要"、"2人小刀价"），不是价格本身。
+      // 曾经在文本里用正则剔除「N人想要」，结果正则贪婪，
+      // 把 "¥9.9040人想要" 里的 "9040人想要" 整段吃掉，价格变成 "9.9" ——
+      // 改成**跳过整个节点**就没有边界问题。
+      if (/人想要|想要|浏览|小刀|议价|砍价/.test(raw)) continue;
+
+      // 去掉换行/空格 —— 让被 CSS 拆行的数字重新连起来
+      //（"¥\n69\n.90" → "¥69.90"）
       var flat = String(raw).replace(/\s+/g, '');
       var t;
       if (isRange) {

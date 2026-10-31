@@ -62,6 +62,39 @@
     return cardSeq.map(function (id) { return cardMap[id]; });
   }
 
+  /**
+   * 卡片池诊断：把扫到的卡片（含 wantNum）挂到 window 上。
+   *
+   * 用途：一眼看出「闲鱼这一页到底给不给想要人数」。
+   * 集市/奥莱店铺的卡片显示的是「行情价 XX 元」而不是「N 人想要」，
+   * 光看页面分不清是「接口没给」还是「前端不渲染」——
+   * 这个标记能直接给出答案（页面控制台敲 __XY_CARDS__ 即可）。
+   */
+  function publishCardsDiag() {
+    try {
+      var list = [];
+      for (var i = 0; i < cardSeq.length && i < 400; i++) {
+        var c = cardMap[cardSeq[i]];
+        if (!c) continue;
+        list.push({
+          id: c.itemId,
+          title: String(c.title || '').slice(0, 18),
+          wantNum: c.wantNum == null ? '' : String(c.wantNum),
+          browseNum: c.browseNum == null ? '' : String(c.browseNum),
+          price: c.price == null ? '' : String(c.price),
+          source: c.source || ''
+        });
+      }
+      var withWant = 0;
+      for (var j = 0; j < list.length; j++) if (list[j].wantNum !== '') withWant++;
+      window.__XY_CARDS__ = {
+        total: list.length,
+        withWant: withWant,
+        list: list.slice(0, 60)
+      };
+    } catch (e) {}
+  }
+
   function mergeCards(incoming) {
     if (!incoming || !incoming.length) return 0;
     var added = 0, updated = 0;
@@ -77,6 +110,7 @@
         cardMap[id] = c;
         cardSeq.push(id);
         added++;
+        publishCardsDiag();
       } else {
         // 已有则只补空缺字段，不被空的覆盖
         var merged = {};

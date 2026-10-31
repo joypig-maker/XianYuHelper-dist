@@ -1233,6 +1233,24 @@
   }
 
   /**
+   * 议价热度（闲鱼的「N 人小刀价」）。
+   * 和「N 人想要」是并列的两个热度指标，卡片上只会显示其中一种。
+   */
+  function bargainOf(d) {
+    return numOf(d.bargainNum);
+  }
+
+  /**
+   * 商品的热度值：想要人数优先，没有就用议价热度。
+   * 卡片上两者只显示其一，只认「N人想要」会把有议价热度的商品当成没数据。
+   */
+  function heatOf(d) {
+    var w = wantOf(d);
+    if (w != null) return w;
+    return bargainOf(d);
+  }
+
+  /**
    * 判断一个商品是否符合筛选条件。
    * @returns {{ok:boolean, reason:string}} reason 用于告诉用户为什么没被选中
    */
@@ -1243,15 +1261,18 @@
     var pMax = numOf(filterState.priceMax);
 
     if (wMin != null) {
-      var w = wantOf(d);
+      // ★ 用「热度」而不是只用「想要人数」：
+      //   闲鱼卡片上「N人想要」和「N人小刀价」二选一，
+      //   只认前者的话，带议价热度的商品会被当成「没数据」而漏掉。
+      var w = heatOf(d);
       // ★ 缺数据 = **不符合**，不勾选（2026-10-28 用户反馈修正）。
       //   原来这里返回 ok:true（缺数据也勾上），理由是「怕用户以为功能坏了」——
       //   但那是把「不知道」变成了「勾上一堆用户明确不想要的」。
       //   用户填「想要人数 > 10」的意思很明确：只要够 10 的。
       //   闲鱼确实有些商品不显示想要人数（实测推荐位 8 个里 2 个没有），
       //   这些必须排除，并把数量说清楚（见 applyFilter 的提示）。
-      if (w == null) return { ok: false, missing: 'want', reason: '无想要人数数据' };
-      if (w < wMin) return { ok: false, reason: '想要人数 ' + w + ' < ' + wMin };
+      if (w == null) return { ok: false, missing: 'want', reason: '无热度数据' };
+      if (w < wMin) return { ok: false, reason: '热度 ' + w + ' < ' + wMin };
     }
     if (pMin != null || pMax != null) {
       var p = priceOf(d);
@@ -1275,6 +1296,7 @@
       if (key === 'price') { va = priceOf(da); vb = priceOf(db); }
       else if (key === 'want') { va = wantOf(da); vb = wantOf(db); }
       else if (key === 'browse') { va = browseOf(da); vb = browseOf(db); }
+      else if (key === 'heat') { va = heatOf(da); vb = heatOf(db); }
       else { va = 0; vb = 0; }
       // 缺数据的沉到末尾（升序时在最后，降序时也在最后），
       // 免得「没数据」的商品混在中间看起来像有值
@@ -1362,9 +1384,9 @@
     //   勾了几个？为什么有的没勾上？缺数据的是不是功能坏了？
     var msg = '已勾选 ' + hit + ' 个（共 ' + cardList.length + ' 个）';
     var parts = [];
-    if (belowWant) parts.push(belowWant + ' 个想要人数不够');
+    if (belowWant) parts.push(belowWant + ' 个热度不够');
     if (outOfPrice) parts.push(outOfPrice + ' 个价格不在区间');
-    if (missingWant) parts.push(missingWant + ' 个没有想要人数数据');
+    if (missingWant) parts.push(missingWant + ' 个没有热度数据');
     if (missingPrice) parts.push(missingPrice + ' 个没有价格数据');
     if (parts.length) {
       msg += '，未勾选 ' + parts.join('、');
@@ -1382,6 +1404,7 @@
     ['price-', '价格 从低到高'],
     ['price', '价格 从高到低'],
     ['want', '想要人数 从多到少'],
+    ['heat', '热度 从高到低'],
     ['browse', '浏览量 从多到少']
   ];
 
@@ -1649,6 +1672,11 @@
       // 想要人数 / 浏览量：筛选排序的依据，显示出来用户才知道能按什么筛
       var w = wantOf(d);
       if (w != null) meta.appendChild(el('span', 'xy-pick-want', w + '人想要'));
+      else {
+        // 「N 人小刀价」是闲鱼的另一个热度指标（卡片上只显示其一）
+        var bg = bargainOf(d);
+        if (bg != null) meta.appendChild(el('span', 'xy-pick-want', bg + '人议价'));
+      }
       var b = browseOf(d);
       if (b != null) meta.appendChild(el('span', 'xy-pick-browse', b + '浏览'));
       main.appendChild(meta);
@@ -1693,7 +1721,7 @@
     var row1 = el('div', 'xy-filter-row');
 
     var wantWrap = el('label', 'xy-filter-item');
-    wantWrap.appendChild(el('span', 'xy-filter-label', '想要≥'));
+    wantWrap.appendChild(el('span', 'xy-filter-label', '热度≥'));
     var wantIn = document.createElement('input');
     wantIn.type = 'number';
     wantIn.className = 'xy-filter-input';
