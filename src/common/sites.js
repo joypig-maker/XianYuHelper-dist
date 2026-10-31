@@ -59,7 +59,27 @@
     // 所以批量补详情必须借后台标签页打开详情页去拿，详见 fetchDetailViaTab。
     // 这条漏了会导致：列表页勾选批量打包时，多规格商品的规格表全丢，
     // 而且**没有任何报错**（用户只看到「没下载 sku」）。
+    //
+    // ★★★ 2026-10-31 复测：超时的真正原因不是「页面上下文」，
+    //   而是 mtop 请求少了 **appKey** 和 **spm_cnt** 两个参数。补齐之后：
+    //     店铺页直接调 → 118ms 返回，wantCnt / browseCnt / skuList 全有
+    //     16 个并发     → 336ms（平均 21ms/个）
+    //   1000 个商品的店铺，补详情从「80 多分钟」降到 **20 秒量级**。
+    //   所以配 mtopAnyPage=true：先在当前页直连，失败才退回后台标签页。
     detailPageOnly: true,
+    mtopAnyPage: true,
+
+    // mtop 直连必须带的两个参数（抓页面自己的请求对比出来的）。
+    // 缺任一个都是 20 秒「TIMEOUT::接口超时」——这才是「补齐一个要 30 秒」的根因。
+    mtop: {
+      appKey: '34839810',
+      // spm_cnt 按页面类型走：详情页 a21ybx.item.0.0，其余（店铺/搜索）a21ybx.personal.0
+      spmOf: function (href) {
+        return /\/item(\?|\/|$)/i.test(href || '')
+          ? 'a21ybx.item.0.0'
+          : 'a21ybx.personal.0';
+      }
+    },
 
     detailApi: {
       api: 'mtop.taobao.idle.pc.detail',

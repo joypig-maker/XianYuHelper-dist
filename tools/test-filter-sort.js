@@ -194,15 +194,15 @@ section('6) ★★ 排序逻辑');
 section('7) ★★ 界面');
 {
   is('★ 有筛选条渲染函数', /function renderFilterBar\(body\)/.test(BR));
-  is('★ 有「热度≥」输入框（想要人数+议价热度合并）', /'热度≥'/.test(BR));
+  is('★ 有「想要数≥」输入框（想要人数+议价热度合并）', /'想要数≥'/.test(BR));
   is('★ 有价格区间两个输入框',
     /'低'/.test(BR) && /'高'/.test(BR));
   is('★ 有排序下拉', /document\.createElement\('select'\)/.test(BR));
   is('★ 有「筛选并勾选」按钮', /'筛选并勾选'/.test(BR));
   is('★ 有「追加勾选」按钮', /'追加勾选'/.test(BR));
   is('★ 有「清空条件」按钮', /'清空条件'/.test(BR));
-  is('★★ 有「补热度」按钮（只补缺想要人数的，快）',
-    /'补热度'/.test(BR) && /function fillMissingDetails/.test(BR) &&
+  is('★★ 有「补想要数」按钮（只补缺想要人数的，快）',
+    /'补想要数'/.test(BR) && /function fillMissingDetails/.test(BR) &&
     /fillMissingDetails\('heat'\)/.test(BR));
   is('★★ 有「补全部」按钮（含规格表，慢但下载规格图需要）',
     /'补全部'/.test(BR) && /fillMissingDetails\('all'\)/.test(BR));
@@ -210,7 +210,7 @@ section('7) ★★ 界面');
     /if \(heatOf\(d\) == null\) return true;/.test(BR) &&
     /if \(mode === 'all'\)/.test(BR));
   is('★ 提示里区分「不够」与「没数据」',
-    /个热度不够/.test(BR) && /个没有热度数据/.test(BR));
+    /个想要数不够/.test(BR) && /个没有想要数/.test(BR));
   is('★ 筛选条在列表工具区里', /renderFilterBar\(body\);/.test(BR));
   is('★ 每行显示想要人数', /'人想要'/.test(BR));
   is('★★ 面板列表不再硬截断（分批「显示更多」）',

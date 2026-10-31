@@ -134,7 +134,8 @@
         //     · 列表卡片 DOM 上的「N 人想要」「N 浏览」（列表页就有）
         //   不列进来的话，先到的那份若为空，后到的那份就被丢掉了 ——
         //   而两份合起来才是完整数据，筛选和排序都靠它。
-        ['title', 'price', 'image', 'sellerNick', 'wantNum', 'browseNum'].forEach(function (k) {
+        ['title', 'price', 'image', 'sellerNick', 'wantNum', 'browseNum',
+          'bargainNum'].forEach(function (k) {
           if (!(String(merged[k] || '').trim()) && String(c[k] || '').trim()) merged[k] = c[k];
         });
         // images 也得跟着补：collectCards 现在会产出多图，
@@ -412,6 +413,15 @@
         //     补全参数（页面的）    → **271ms SUCCESS**，wantCnt 拿得到
         //   这就是「补齐一个要 30 秒」的真正原因 —— 不是慢，是根本没取到，
         //   一遍遍重试把时间耗掉了。
+        //
+        //   ★ 还有两个参数同样致命：**appKey** 和 **spm_cnt**。
+        //   上面那套补全之后，在店铺页调详情接口**仍然 20 秒超时**
+        //   （实测三组对照）：
+        //     A 基础参数                → TIMEOUT（20.0s）
+        //     B 基础 + appKey          → TIMEOUT（20.0s）
+        //     C 基础 + appKey + spm_cnt → **118ms 成功**，wantCnt/browseCnt 全有
+        //   也就是说：不带 spm_cnt，服务端直接不应答。
+        //   加上之后 16 个并发只花 336ms —— 1000 个商品的店铺不用再开标签页。
         var full = {
           type: 'POST',
           dataType: 'json',
@@ -421,6 +431,14 @@
           ecode: 0,
           H5Request: true
         };
+        if (SITE && SITE.mtop) {
+          if (SITE.mtop.appKey) full.appKey = SITE.mtop.appKey;
+          if (typeof SITE.mtop.spmOf === 'function') {
+            try { full.spm_cnt = SITE.mtop.spmOf(location.href); } catch (e) {}
+          } else if (SITE.mtop.spmCnt) {
+            full.spm_cnt = SITE.mtop.spmCnt;
+          }
+        }
         for (var k in params) {
           if (Object.prototype.hasOwnProperty.call(params, k)) full[k] = params[k];
         }
@@ -598,7 +616,11 @@
     //   曾经匹配不上默认正则，见 sites.js 的 detailPageRe）。
     //   现在配置已修正，但这里再加一道保险：
     //   已经在后台页里（由 SW 开的）就不再借，直接采。
-    if (SITE.detailPageOnly && !isOnDetailPage(itemId) && !inBackgroundTab()) {
+    // mtopAnyPage 的站点（闲鱼）：先走下面的「当前页直连」，
+    //   实测几十毫秒就回来，比开一个后台标签页（导航 3~8s）快两个数量级。
+    //   直连失败再退回后台标签页（见下面 fallback）。
+    if (SITE.detailPageOnly && !isOnDetailPage(itemId) && !inBackgroundTab()
+        && !SITE.mtopAnyPage) {
       var viaTab = await fetchDetailViaTab(itemId);
       if (viaTab) return viaTab;
     }
@@ -644,6 +666,15 @@
           return d;
         }
       }
+    }
+
+    // 直连这条路没拿到（页面刚加载 lib.mtop 还没就绪、或服务端偶发不应答），
+    // 而站点又要求「详情页上下文才通」时才借后台标签页。
+    // 放在直连**之后**，是为了让 mtopAnyPage 的站点绝大多数情况下都不用开标签页。
+    if (SITE.mtopAnyPage && SITE.detailPageOnly
+        && !isOnDetailPage(itemId) && !inBackgroundTab()) {
+      var viaTab2 = await fetchDetailViaTab(itemId);
+      if (viaTab2) return viaTab2;
     }
 
     if (cfg.jsonp) {

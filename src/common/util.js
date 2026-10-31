@@ -631,6 +631,11 @@
    * @returns {{itemId:string,title:string,price:string,image:string,sellerNick:string,url:string}[]}
    */
   var CARD_LIST_PATHS = [
+    // 闲鱼店铺页商品列表（mtop.idle.web.xyh.item.list，2026-10-31 实测）：
+    //   data.cardList = [ { cardType, cardData: { id, title, priceInfo, itemLabelDataVO } } ]
+    // 放在最前面：这是集市/奥莱店铺唯一的商品来源，
+    // 而且 cardData 里带着**标签行里的想要人数**，DOM 上被行情价顶掉看不到。
+    'cardList', 'data.cardList', 'data.data.cardList',
     'resultList', 'data.resultList', 'data.data.resultList',
     'itemList', 'data.itemList',
     'itemsList', 'data.itemsList',
@@ -705,6 +710,58 @@
     return '';
   }
 
+  /**
+   * 闲鱼列表接口（mtop.idle.web.xyh.item.list）藏在**卡片标签行**里的热度数字。
+   *
+   * 背景（2026-10-31 实测，集市店铺 userId=2208526863302）：
+   *   卡片 DOM 上，集市商品的「N人想要」被「行情价 XX 元」顶掉了，
+   *   肉眼和 DOM 都读不到想要人数，于是只能逐个进详情页补 ——
+   *   1000 个商品的店铺按 5 秒/个算要 80 多分钟，根本不能用。
+   *
+   *   但列表接口**自己**是给了的：cardData.itemLabelDataVO.labelData
+   *   → { r1/r2/r3/r5: { tagList: [ { data: { content: "3人想要" } } ] } }
+   *   同一个商品上「行情价240元」和「3人想要」是并列的两个标签，
+   *   只是前端没把它渲染出来。
+   *
+   *   对账结论（16/16 全对）：
+   *     · 标签里写了「N人想要」→ 详情接口 itemDO.wantCnt 就是 N
+   *     · 标签里**没有**「N人想要」→ 详情接口 itemDO.wantCnt 就是 0
+   *   所以「标签缺失」不是「数据缺失」，而是「0 人想要」——
+   *   这条成立，整店上千件商品就**不用进详情页**也能拿到想要人数。
+   *
+   * @returns {{wantNum:string, bargainNum:string, marketPrice:string, sawLabels:boolean}}
+   *   sawLabels=true 表示这张卡片确实带了标签结构（此时 wantNum 为空 == 0 人想要）
+   */
+  U.xyLabelNums = function (node) {
+    var out = { wantNum: '', bargainNum: '', marketPrice: '', sawLabels: false };
+    try {
+      var ld = node && node.itemLabelDataVO && node.itemLabelDataVO.labelData;
+      if (!ld || typeof ld !== 'object') return out;
+      var seen = 0;
+      Object.keys(ld).forEach(function (rk) {
+        var tl = ld[rk] && ld[rk].tagList;
+        if (!Array.isArray(tl)) return;
+        for (var i = 0; i < tl.length; i++) {
+          var c = tl[i] && tl[i].data && tl[i].data.content;
+          if (typeof c !== 'string' || !c) continue;
+          seen++;
+          var m = c.match(/(\d+(?:\.\d+)?)\s*人想要/);
+          if (m) { out.wantNum = String(Math.floor(Number(m[1]))); continue; }
+          m = c.match(/(\d+(?:\.\d+)?)\s*人(?:小刀价|议价|砍价)/);
+          if (m) { out.bargainNum = String(Math.floor(Number(m[1]))); continue; }
+          m = c.match(/行情价\s*(\d+(?:\.\d+)?)\s*元/);
+          if (m) { out.marketPrice = String(m[1]); continue; }
+        }
+      });
+      out.sawLabels = seen > 0;
+      // ★ 标签结构在、但没有「N人想要」→ 这个商品就是 0 人想要。
+      //   不写成 '0' 的话，mergeCards 的「补空」逻辑会把后面 DOM 那轮的
+      //   空值也放进来，最后还是「没数据」，筛选照样把它漏掉。
+      if (out.sawLabels && !out.wantNum) out.wantNum = '0';
+    } catch (e) {}
+    return out;
+  };
+
   U.collectCards = function (root, opts) {
     if (!root || typeof root !== 'object') return [];
     opts = opts || {};
@@ -732,7 +789,10 @@
       if (!isId(rawId)) {
         // 兼容多包了一层的结构，如 { item: { itemId, title } }
         if ((depth || 0) < 2) {
-          var nested = node.item || node.data || node.card || node.itemDO || node.goods || node.result;
+          // cardData：闲鱼店铺列表接口把商品包在这一层里
+          // （{ cardType, cardData: {...} }），不认它整店一件都收不到。
+          var nested = node.item || node.data || node.card || node.cardData
+            || node.itemDO || node.goods || node.result;
           if (nested && typeof nested === 'object' && !Array.isArray(nested)) {
             return pick(nested, (depth || 0) + 1);
           }
@@ -764,6 +824,14 @@
         var pv = node.finalPriceVo.priceView;
         if (pv.humpHighPart != null) priceRaw = pv.humpHighPart + (pv.humpLowPart || '');
       }
+      // 闲鱼店铺列表接口把价格包在 priceInfo 里（{ preText:'¥', price:'228' }），
+      // 卡片顶层没有 price/soldPrice —— 不认这一层，整店页上千件商品全是空价，
+      // 价格区间筛选直接失效（2026-10-31 实测 mtop.idle.web.xyh.item.list）。
+      if (!priceRaw && node.priceInfo) {
+        priceRaw = node.priceInfo.price != null
+          ? node.priceInfo.price
+          : (node.priceInfo.priceText || node.priceInfo.priceShow || '');
+      }
       var seller = node.seller || node.user || {};
       // 图片先收数组，收不到才退回单值字段。
       // 原来这里只取 offerImages[0] / imageInfos[0]，等于把"一件的图"缩成一张，
@@ -783,6 +851,28 @@
       // 只有单值时也要落到数组里：下游一律读 images 判数量，
       // 只给 image 会让 selectedItems 算出「0 张图」。
       if (!imgs.length && img) imgs = [img];
+      // 闲鱼店铺列表接口把图集塞在 detailParams.imageInfos 里，而且是 **JSON 字符串**
+      // （不是数组），不解析就只能拿到 picInfo 的单张主图（2026-10-31 实测）。
+      if (imgs.length <= 1 && node.detailParams &&
+          typeof node.detailParams.imageInfos === 'string') {
+        try {
+          var parsed = JSON.parse(node.detailParams.imageInfos);
+          if (Array.isArray(parsed) && parsed.length) {
+            var more = [];
+            for (var pi = 0; pi < parsed.length; pi++) {
+              var pu = parsed[pi] && (parsed[pi].url || parsed[pi].picUrl);
+              pu = pu ? U.normalizeImageUrl(pu) : '';
+              if (pu && more.indexOf(pu) === -1) more.push(pu);
+            }
+            if (more.length > imgs.length) imgs = more;
+            if (!img && more.length) img = more[0];
+          }
+        } catch (e) {}
+      }
+
+      // ★ 闲鱼列表接口的「想要人数」在标签行里（详见 U.xyLabelNums 的注释）。
+      //   卡片 DOM 上被「行情价」顶掉、肉眼看不到，但接口一直是给的。
+      var labels = U.xyLabelNums(node);
 
       byId.add(id);
       return {
@@ -798,7 +888,8 @@
         // 想要人数 / 浏览量：列表接口给了就用（闲鱼叫 wantCnt / browseCnt），
         // 没给就留空 —— 后面 DOM 扫描那轮会补上「N 人想要」的文字。
         // 两条路都要有：接口先到、DOM 后到时靠 mergeCards 的「补空」合并。
-        wantNum: pickNum(node, ['wantCnt', 'wantNum', 'favorCnt']),
+        wantNum: pickNum(node, ['wantCnt', 'wantNum', 'favorCnt']) || labels.wantNum,
+        bargainNum: pickNum(node, ['bargainCnt', 'bargainNum']) || labels.bargainNum,
         browseNum: pickNum(node, ['browseCnt', 'browseNum', 'viewCnt']),
         url: itemUrl(id)
       };

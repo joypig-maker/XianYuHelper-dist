@@ -1185,15 +1185,39 @@
 
   // 一个商品可能在页面上出现多处（卡片 + 浮层清单），勾一次要全部跟着变。
   // 两种形态的选择器必须一起扫，否则会出现"清单勾了、卡片没勾"的错位。
+  //
+  // ★ 2026-10-31 修「两个方向都不同步」：
+  //   原来只管「找得到的东西」，找不到的就静默跳过 —— 于是
+  //     · 页面卡片勾了、但那一行在面板 60 行之外  → 面板看着没反应
+  //     · 面板勾了、但页面上那张卡片还没挂上复选框 → 页面看着没反应
+  //   现在两侧都各记一次「同步到了几个」，返回给调用方，
+  //   一侧为 0 就补挂一次 / 提示用户，不再无声失败。
   function syncCheckUI(itemId, on) {
-    var sel = '.xy-check[data-xy-id="' + itemId + '"],'
-      + '.xy-pick-row[data-xy-id="' + itemId + '"]';
-    var labs = document.querySelectorAll(sel);
-    for (var i = 0; i < labs.length; i++) {
-      var inp = labs[i].querySelector('input');
-      if (inp) { inp.__xyOn = !!on; inp.checked = !!on; }
-      labs[i].classList.toggle('xy-check-on', !!on);
+    var pageSel = '.xy-check[data-xy-id="' + itemId + '"]';
+    var panelSel = '.xy-pick-row[data-xy-id="' + itemId + '"]';
+
+    function paint(sel) {
+      var labs = document.querySelectorAll(sel);
+      for (var i = 0; i < labs.length; i++) {
+        var inp = labs[i].querySelector('input');
+        if (inp) { inp.__xyOn = !!on; inp.checked = !!on; }
+        labs[i].classList.toggle('xy-check-on', !!on);
+      }
+      return labs.length;
     }
+
+    var onPage = paint(pageSel);
+    var onPanel = paint(panelSel);
+
+    // 页面上压根没有这张卡片的复选框（卡片是滚动后才渲染的、
+    // 或上一轮 attachChecks 时它还不在 DOM 里）→ 现在补挂一次再刷。
+    if (!onPage) {
+      try {
+        if (attachOne(itemId)) onPage = paint(pageSel);
+      } catch (e) {}
+    }
+    syncCheckUI.lastHit = { page: onPage, panel: onPanel };
+    return onPage + onPanel;
   }
 
   /**
@@ -1210,11 +1234,29 @@
     return !!selected[id];
   }
 
-  function setSelected(itemId, on) {
+  /**
+   * @param {string} itemId
+   * @param {boolean} on
+   * @param {string} [src] 谁触发的：'page' = 页面卡片左上角复选框，
+   *                       'panel' = 右下角面板清单。用来做「对面也必须看得见」。
+   */
+  function setSelected(itemId, on, src) {
     if (on) selected[itemId] = 1;
     else delete selected[itemId];
     syncCheckUI(itemId, on);
     renderCount();
+
+    // 页面卡片上勾的 → 面板里必须能看见这一行。
+    // 整店页几百上千件，面板一次只铺 60 行，勾到第 80 件时
+    // 面板上根本没这一行 —— 用户看到的就是「点了没反应」。
+    if (src === 'page') ensureRowVisible(itemId);
+
+    // 面板里勾的 → 页面上必须出现勾选框。页面上找不到这张卡片
+    // （滚出可视区被回收 / 懒加载还没渲染）时，别默默什么都不做，
+    // 明说一声，免得用户以为插件坏了。
+    if (src === 'panel' && on && !syncCheckUI.lastHit.page) {
+      toast('已记录勾选；页面上暂时找不到这张卡片（可能已滚出可视区）');
+    }
   }
 
   function selectAll(on) {
@@ -1297,7 +1339,7 @@
   }
 
   /**
-   * 商品的热度值：想要人数优先，没有就用议价热度。
+   * 商品的想要数：想要人数优先，没有想要人数时用议价热度兜底。
    * 卡片上两者只显示其一，只认「N人想要」会把有议价热度的商品当成没数据。
    */
   function heatOf(d) {
@@ -1317,7 +1359,7 @@
     var pMax = numOf(filterState.priceMax);
 
     if (wMin != null) {
-      // ★ 用「热度」而不是只用「想要人数」：
+      // ★ 用「想要数」（想要人数优先、议价兜底）而不是只用「想要人数」：
       //   闲鱼卡片上「N人想要」和「N人小刀价」二选一，
       //   只认前者的话，带议价热度的商品会被当成「没数据」而漏掉。
       var w = heatOf(d);
@@ -1327,8 +1369,8 @@
       //   用户填「想要人数 > 10」的意思很明确：只要够 10 的。
       //   闲鱼确实有些商品不显示想要人数（实测推荐位 8 个里 2 个没有），
       //   这些必须排除，并把数量说清楚（见 applyFilter 的提示）。
-      if (w == null) return { ok: false, missing: 'want', reason: '无热度数据' };
-      if (w < wMin) return { ok: false, reason: '热度 ' + w + ' < ' + wMin };
+      if (w == null) return { ok: false, missing: 'want', reason: '无想要数' };
+      if (w < wMin) return { ok: false, reason: '想要数 ' + w + ' < ' + wMin };
     }
     if (pMin != null || pMax != null) {
       var p = priceOf(d);
@@ -1462,9 +1504,9 @@
     //   勾了几个？为什么有的没勾上？缺数据的是不是功能坏了？
     var msg = '已勾选 ' + hit + ' 个（共 ' + cardList.length + ' 个）';
     var parts = [];
-    if (belowWant) parts.push(belowWant + ' 个热度不够');
+    if (belowWant) parts.push(belowWant + ' 个想要数不够');
     if (outOfPrice) parts.push(outOfPrice + ' 个价格不在区间');
-    if (missingWant) parts.push(missingWant + ' 个没有热度数据');
+    if (missingWant) parts.push(missingWant + ' 个没有想要数');
     if (missingPrice) parts.push(missingPrice + ' 个没有价格数据');
     if (parts.length) {
       msg += '，未勾选 ' + parts.join('、');
@@ -1482,7 +1524,7 @@
     ['price-', '价格 从低到高'],
     ['price', '价格 从高到低'],
     ['want', '想要人数 从多到少'],
-    ['heat', '热度 从高到低'],
+    ['heat', '想要数 从多到少'],
     ['browse', '浏览量 从多到少']
   ];
 
@@ -1730,6 +1772,27 @@
   var pickShown = 60;      // 当前显示多少行
   var pickOnlyChecked = false;   // 只看已勾选
 
+  /**
+   * 保证某个商品在面板清单里**看得见**。
+   *
+   * 在页面卡片左上角勾了一件商品，它在清单里的位置可能远在 60 行之外 ——
+   * 面板上连这一行都没有，用户当然觉得「插件里没勾上」。
+   * 这里把显示行数扩到能盖住它（按 200 的步长，避免一次铺几千行卡死）。
+   */
+  function ensureRowVisible(itemId) {
+    if (!itemId) return;
+    var sorted = sortedCards();
+    if (pickOnlyChecked && !selected[itemId]) return;  // 只看已勾选时不强行改视图
+    var idx = -1;
+    for (var i = 0; i < sorted.length; i++) {
+      if (sorted[i] && sorted[i].itemId === itemId) { idx = i; break; }
+    }
+    if (idx < 0 || idx < pickShown) return;
+    // 200 一档往上抬，抬到能盖住这一行为止
+    pickShown = Math.ceil((idx + 1) / 200) * 200;
+    render();
+  }
+
   function renderPicker(body) {
     var box = el('div', 'xy-pick');
     // 按当前排序显示
@@ -1821,7 +1884,7 @@
     var row1 = el('div', 'xy-filter-row');
 
     var wantWrap = el('label', 'xy-filter-item');
-    wantWrap.appendChild(el('span', 'xy-filter-label', '热度≥'));
+    wantWrap.appendChild(el('span', 'xy-filter-label', '想要数≥'));
     var wantIn = document.createElement('input');
     wantIn.type = 'number';
     wantIn.className = 'xy-filter-input';
@@ -1893,7 +1956,7 @@
     var bAdd = btn('追加勾选', 'filter-add');
     bAdd.title = '保留原有勾选，只把符合条件的补勾上';
     row2.appendChild(bAdd);
-    var bFill = btn('补热度', 'filter-fill');
+    var bFill = btn('补想要数', 'filter-fill');
     bFill.title = '只补「缺想要人数」的商品（集市/奥莱商品的卡片上没有「N人想要」，'
       + '但详情接口有）。补完再筛一次最准。每件约 5 秒。';
     row2.appendChild(bFill);
@@ -1927,7 +1990,7 @@
     });
     if (cardList.length) {
       head.appendChild(el('span', 'xy-heat-stat',
-        '有热度 ' + withHeat + '/' + cardList.length));
+        '有想要数 ' + withHeat + '/' + cardList.length));
     }
     var ops = el('div', 'xy-list-ops');
     ops.appendChild(btn('全选', 'sel-all'));
@@ -2118,7 +2181,7 @@
       var chkInput = chk.querySelector ? chk.querySelector('input[type=checkbox]') : null;
       var turnOn = !boxOn(chkInput, chkId);
       if (chkInput) { chkInput.__xyOn = turnOn; chkInput.checked = !!turnOn; }
-      if (chkId) setSelected(chkId, !!turnOn);
+      if (chkId) setSelected(chkId, !!turnOn, 'page');
       return;
     }
 
@@ -2131,7 +2194,7 @@
       var pickInput = pick.querySelector('.xy-pick-box');
       var pickOn = !boxOn(pickInput, pickId);
       if (pickInput) { pickInput.__xyOn = pickOn; pickInput.checked = !!pickOn; }
-      if (pickId) setSelected(pickId, !!pickOn);
+      if (pickId) setSelected(pickId, !!pickOn, 'panel');
       return;
     }
 
