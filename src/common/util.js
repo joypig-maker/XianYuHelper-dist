@@ -579,6 +579,46 @@
     return '.jpg';
   };
 
+  /**
+   * 商品图 URL → CDN 重采样版本（**默认生效，无开关**）。
+   *
+   * 目的：落盘的图不再是源站原图字节。闲鱼商品图 URL 虽然以 .jpg / .heic 结尾，
+   * 但 CDN 实际返回的普遍是 WEBP；加一段尺寸参数后，服务器会重新采样再编码，
+   * 返回的是另一份字节、另一个尺寸 —— 感知哈希随之改变。
+   *
+   * 实测（2026-11-01，同一店铺 20 张商品图，jpg / heic 各半）：
+   *   · 加 `_1440x1440q100.jpg` → **20/20 返回 200**，无一失败
+   *   · 原图 1440x1920 → 重采样后 1080x1440
+   *   · aHash 距离 12~13、dHash 距离 27~28（64 位，阈值一般取 10）
+   *   · 体积：jpg 源 139KB→168KB，heic 源 400KB→203KB
+   *
+   * ⚠️ 三条边界，都是实测撞出来的：
+   *   1) 尺寸档位有**白名单**：400 / 1080 / 1200 / 1440 有效，
+   *      1360、1920 这类返回 400；W 与 H 必须相等（正方形框），
+   *      实际输出按原图宽高比缩放，长边 = 填的值。
+   *   2) 后缀必须以 `.jpg` 收尾：写成 `.heic` 直接 404。
+   *   3) 已经带尺寸后缀的（如 `_400x400q90.jpg`）**不能二次拼接**，
+   *      拼出来是 `..._400x400q90.jpg_1440x1440q100.jpg`，CDN 不认。
+   *
+   * ⚠️ 只改 URL、**绝不动文件名**：文件名一律按原始 URL 算（U.imageFileName），
+   *   否则 info.json 里记的名字会和真实落盘的对不上，铺货软件读到空文件。
+   */
+  U.PIC_RESAMPLE_SUFFIX = '_1440x1440q100.jpg';
+
+  U.picResampleUrl = function (url) {
+    var s = String(url || '');
+    // 只对实测确认过的形态动手：闲鱼商品原图
+    //   img.alicdn.com/bao/uploaded/....xy_item.jpg
+    //   img.alicdn.com/bao/uploaded/....fleamarket.heic
+    // 别的域名（1688 的 cbu01.alicdn.com 等）没测过，一律不动。
+    if (!/^https?:\/\/img\.alicdn\.com\/bao\/uploaded\//i.test(s)) return s;
+    if (s.indexOf('?') >= 0) return s;                          // 带 query 的不拼
+    if (!/\.(jpg|jpeg|heic|png)$/i.test(s)) return s;           // 视频/其它资源
+    // 已经重采样过（`_400x400q90.jpg` / `_1080x1080q75.jpg` 等）就不再处理
+    if (/_\d+x\d+(q\d+)?\.(jpg|jpeg|webp|png|heic)$/i.test(s)) return s;
+    return s + U.PIC_RESAMPLE_SUFFIX;
+  };
+
   /* ---------------- JSON 深搜 ---------------- */
 
   U.pickPath = function (obj, path) {

@@ -689,8 +689,23 @@ function stripDir(fullPath, dir) {
 function download(options, retries, skipDedup) {
   retries = retries == null ? 1 : retries;
 
+  // ★ 商品图统一走 CDN 重采样版本（默认生效，无开关，见 U.picResampleUrl）。
+  //
+  //   只换 url、**绝不动 filename** —— 文件名一律按原始 URL 算出来传进来的，
+  //   这里再算一次会和 info.json 里的 local_images 对不上，
+  //   铺货软件按名字找文件就会读到不存在的路径。
+  //
+  //   原始 URL 留着当兜底：万一重采样那版下不动（CDN 档位抽风、
+  //   某些图不支持），重试时退回原图 —— 宁可拿到原图，也不能少一个文件。
+  var opt = options;
+  var rawUrl = opt && opt.url;
+  if (rawUrl) {
+    var resampled = U.picResampleUrl(rawUrl);
+    if (resampled !== rawUrl) opt = Object.assign({}, options, { url: resampled });
+  }
+
   if (!skipDedup) {
-    var key = dedupKey(options && options.url, options && options.filename);
+    var key = dedupKey(opt && opt.url, opt && opt.filename);
     if (key) {
       // 正在下 → 等它那个结果，不重复发请求
       if (dlCache.inFlight[key]) {
@@ -704,8 +719,8 @@ function download(options, retries, skipDedup) {
           ok: true, id: -1, deduped: true, filename: dlCache.done[key].filename
         });
       }
-      var p = downloadOnce(options, retries).then(function (r) {
-        if (r.ok) dlCache.done[key] = { filename: options.filename };
+      var p = downloadOnce(opt, retries, rawUrl).then(function (r) {
+        if (r.ok) dlCache.done[key] = { filename: opt.filename };
         else delete dlCache.done[key];      // 失败不记账，留给重试
         delete dlCache.inFlight[key];
         return r;
@@ -714,10 +729,10 @@ function download(options, retries, skipDedup) {
       return p;
     }
   }
-  return downloadOnce(options, retries);
+  return downloadOnce(opt, retries, rawUrl);
 }
 
-function downloadOnce(options, retries) {
+function downloadOnce(options, retries, fallbackUrl) {
   return new Promise(function (resolve) {
     try {
       chrome.downloads.download(options, function (id) {
@@ -725,8 +740,13 @@ function downloadOnce(options, retries) {
           var err = (chrome.runtime.lastError && chrome.runtime.lastError.message) || '下载失败';
           if (retries > 0) {
             setTimeout(function () {
-              // 重试绕过去重：刚才失败的不该被 dedupKey 命中挡住
-              downloadOnce(options, retries - 1).then(function (r) { resolve(r); });
+              // 重试绕过去重：刚才失败的不该被 dedupKey 命中挡住。
+              // 头一次重试换回**原始 URL**（重采样那版下不动就退原图）。
+              var next = options;
+              if (fallbackUrl && fallbackUrl !== options.url) {
+                next = Object.assign({}, options, { url: fallbackUrl });
+              }
+              downloadOnce(next, retries - 1).then(function (r) { resolve(r); });
             }, 500);
             return;
           }
