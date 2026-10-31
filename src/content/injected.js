@@ -87,11 +87,24 @@
       }
       var withWant = 0;
       for (var j = 0; j < list.length; j++) if (list[j].wantNum !== '') withWant++;
-      window.__XY_CARDS__ = {
+      var diag = {
         total: list.length,
         withWant: withWant,
         list: list.slice(0, 60)
       };
+      window.__XY_CARDS__ = diag;
+      // ★ 同时写到 DOM 上。
+      //   window 上的变量在 **MAIN world**，而页面控制台默认跑在
+      //   **ISOLATED world**（扩展那个），两边不是一个上下文 ——
+      //   用户在控制台敲 __XY_CARDS__ 会得到
+      //   「Uncaught ReferenceError: __XY_CARDS__ is not defined」。
+      //   写到 DOM 属性上就两边都能读：
+      //     document.documentElement.dataset.xyCards
+      //     或者控制台敲 document.documentElement.dataset.xyCards
+      try {
+        document.documentElement.setAttribute('data-xy-cards',
+          JSON.stringify({ total: diag.total, withWant: diag.withWant }));
+      } catch (e) {}
     } catch (e) {}
   }
 

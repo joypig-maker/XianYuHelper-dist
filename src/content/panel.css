@@ -505,3 +505,21 @@
   line-height: 1.5;
   color: #86909c;
 }
+
+/* ---- 卡片上的「N 人想要」角标 ----
+ * 集市/奥莱商品的卡片位置被闲鱼的「行情价 XX 元」占了，
+ * 页面上看不到想要人数。扩展补完详情后把 wantCnt 标到同一个位置，
+ * **追加**而不是替换 —— 闲鱼自己的行情价是有用信息，不能覆盖掉。 */
+.xy-want-badge {
+  margin-left: 4px;
+  font-size: 12px;
+  color: #ff8f00;
+  white-space: nowrap;
+}
+
+/* 有热度商品数 / 总数 —— 直接告诉用户「还差多少需要补详情」 */
+.xy-heat-stat {
+  margin-left: 6px;
+  font-size: 10px;
+  color: #ff8f00;
+}

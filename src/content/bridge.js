@@ -130,6 +130,8 @@
         if (keep != null && String(keep).trim() !== '') cardIndex[m.itemId][k] = keep;
       }
     });
+    // 详情一到就把「N 人想要」标到卡片上（集市商品页面上本来没有这个数）
+    paintWantBadges();
     return null;
   });
   bus && bus.on('injected', 'ensure-progress', function (m) {
@@ -1092,6 +1094,60 @@
     return hits[0];
   }
 
+  /**
+   * 在商品卡片上标出「N 人想要」。
+   *
+   * 为什么需要（2026-10-31 实测）：
+   *   闲鱼卡片上那个位置是**三选一**——
+   *     「N人想要」 / 「N人小刀价」 / 「行情价XX元」
+   *   集市（奥莱清仓）类商品的卡片显示的是「行情价」，
+   *   **想要人数在列表页压根不存在**，DOM 上没有、接口也不给。
+   *   唯一来源是详情接口的 itemDO.wantCnt（补详情能拿到）。
+   *
+   * 所以：补完详情后，把拿到的 wantNum **追加**到卡片上，
+   * 让用户在页面上直接看得见 —— 而不是只能到面板里找。
+   *
+   * 用「追加」而不是「替换」：闲鱼自己显示的「行情价 XX 元」是有用信息，
+   * 不能因为扩展要显示想要人数就把人家覆盖掉。
+   */
+  function paintWantBadges() {
+    if (!cardList.length) return;
+    var painted = 0;
+    cardList.forEach(function (c) {
+      if (!c || !c.itemId) return;
+      var d = detailMap[c.itemId] || cardIndex[c.itemId] || null;
+      var w = numOf(d && d.wantNum);
+      if (w == null) return;
+      var link = findCardEl(c.itemId);
+      if (!link) return;
+      var box = null;
+      try { box = U.cardBox(link); } catch (e) {}
+      if (!box || !box.querySelector) return;
+
+      var badge = box.querySelector('.xy-want-badge');
+      if (!badge) {
+        // 挂在价格描述位置（闲鱼原生就放这儿）；没有就退到价格容器
+        var host = box.querySelector('[class*=price-desc],[class*=PriceDesc]')
+          || box.querySelector('[class*=price-wrap],[class*=PriceWrap]')
+          || box.querySelector('[class*=price],[class*=Price]');
+        if (!host) return;
+        badge = document.createElement('span');
+        badge.className = 'xy-want-badge';
+        badge.setAttribute('data-xy-id', c.itemId);
+        badge.title = '想要人数（来自商品详情接口）';
+        host.appendChild(badge);
+      }
+      badge.textContent = w + '人想要';
+      badge.setAttribute('data-xy-id', c.itemId);
+      painted++;
+    });
+    if (painted) {
+      try {
+        window.__XY_BADGES__ = painted;
+      } catch (e) {}
+    }
+  }
+
   function attachOne(itemId) {
     if (!itemId) return false;
     var link = findCardEl(itemId);
@@ -1319,19 +1375,29 @@
    * 只补详情不下载 —— 补完直接重新筛选，让用户自己决定要不要下。
    */
   async function fillMissingDetails() {
-    var wantMin = numOf(filterState.wantMin);
+    // ★ 挑「缺数据」的商品（2026-10-31 修）。
+    //   原来的写法是：有筛选条件就挑缺热度的，没筛选条件就挑缺价格的。
+    //   结果集市商品**有价格**（列表页就给了），于是没填筛选条件时
+    //   一个都挑不出来 → 点了「补齐详情」提示「没有需要补详情的商品」，
+    //   用户完全不知道该填什么。
+    //
+    //   正确：挑**缺热度数据**的（集市/奥莱商品的卡片上没有「N人想要」，
+    //   补完详情才有 wantCnt）；另外也把缺规格的带上
+    //   —— 规格图也只在详情里有。
     var need = cardList.filter(function (c) {
       if (!c || !c.itemId) return false;
-      if (wantMin != null && wantOf(effData(c.itemId)) != null) return false;
-      if (wantMin == null && priceOf(effData(c.itemId)) != null) return false;
-      return true;
+      var d = effData(c.itemId);
+      if (heatOf(d) == null) return true;              // 缺想要人数 → 补
+      var sk = d.skus;
+      if (!sk || !sk.list || !sk.list.length) return true;  // 缺规格表 → 补
+      return false;
     }).map(function (c) { return c.itemId; });
     if (!need.length) {
-      toast('没有需要补详情的商品');
+      toast('本页商品都已有想要人数和规格，无需补齐');
       return;
     }
     toast('正在补齐 ' + need.length + ' 个商品的详情，约 ' +
-      Math.ceil(need.length / 3) * 30 + ' 秒');
+      Math.ceil(need.length / 3) * 6 + ' 秒');
     var BATCH = 20;
     for (var i = 0; i < need.length; i += BATCH) {
       var part = need.slice(i, i + BATCH);
@@ -1343,6 +1409,8 @@
       }
       toast('已补 ' + Math.min(i + BATCH, need.length) + '/' + need.length + '，继续…');
     }
+    // 补完的详情里带 wantCnt → 把「N 人想要」标到卡片上
+    paintWantBadges();
     toast('补齐完成，已按当前条件重新筛选');
     render();
     // 补完后自动重新执行一次筛选，结果立刻可见
@@ -1804,11 +1872,27 @@
   }
 
   function renderListTools(body) {
+    // 列表重绘时顺手把已有详情的卡片标上「N 人想要」
+    // （补完详情之后卡片是懒加载的，不刷一次看不到）
+    try { paintWantBadges(); } catch (e) {}
     var head = el('div', 'xy-list-head');
     var count = el('span', 'xy-name',
       '已识别 ' + cardList.length + ' 个 · 已勾选 ' + Object.keys(selected).length + ' 个');
     count.className = 'xy-name xy-sel-num';
     head.appendChild(count);
+    // 数据完整度提示：有多少商品有想要人数。
+    // 集市（奥莱）类商品的卡片上没有「N 人想要」，只有补完详情才有 ——
+    // 这个数字直接告诉用户「还差多少需要补」，不用去猜。
+    var withHeat = 0;
+    cardList.forEach(function (c) {
+      if (!c || !c.itemId) return;
+      var d = detailMap[c.itemId] || cardIndex[c.itemId] || null;
+      if (heatOf(d || {}) != null) withHeat++;
+    });
+    if (cardList.length) {
+      head.appendChild(el('span', 'xy-heat-stat',
+        '有热度 ' + withHeat + '/' + cardList.length));
+    }
     var ops = el('div', 'xy-list-ops');
     ops.appendChild(btn('全选', 'sel-all'));
     ops.appendChild(btn('全不选', 'sel-none'));
