@@ -2,7 +2,7 @@
  * 商品图 CDN 重采样（U.picResampleUrl）的单元验证。
  *
  * 背景（2026-11-01 实测，同一店铺 20 张图 jpg/heic 各半）：
- *   闲鱼商品图 URL 加 `_1440x1440q100.jpg` → 20/20 返回 200，
+ *   闲鱼商品图 URL 加 `_1440x1440q80.jpg` → 12/12 字节全变，
  *   原图 1440x1920 → 重采样后 1080x1440，dHash 距离 27~28（阈值 10）。
  *   这条链路的目的是让落盘的图不再是源站原图字节。
  *
@@ -29,7 +29,7 @@ function is(name, cond) {
 
 const XY_JPG = 'https://img.alicdn.com/bao/uploaded/i1/2220477906344/O1CN015kDfDZ1wjbnQZfnry_!!4611686018427387304-0-xy_item.jpg';
 const XY_HEIC = 'http://img.alicdn.com/bao/uploaded/i2/O1CN01atSIuI1bcdpuV3hcQ_!!4611686018427381070-53-fleamarket.heic';
-const SUF = '_1440x1440q100.jpg';
+const SUF = '_1440x1440q80.jpg';
 
 console.log('\n=== 商品图 CDN 重采样 ===');
 
@@ -78,6 +78,13 @@ is('★★ 原始 URL 留作兜底，重试时退回原图',
   /next = Object\.assign\(\{\}, options, \{ url: fallbackUrl \}\)/.test(BR));
 is('★★ 重采样是默认生效的（没有开关判断）',
   !/if \(.*[Ee]nable.*\)\s*\{[^}]*picResampleUrl/.test(BR));
+
+// q 值不能随便改：q100/q95/q85 对小图 heic 原样返回，q90 对小图 jpg 原样返回，
+// 实测只有 q80/q75/q70 能覆盖全部样本（12/12）。改回去会让一部分图白改。
+is('★★ 质量档位必须是 q80（q100/q90 有整类图字节不变）',
+  U.PIC_RESAMPLE_SUFFIX === '_1440x1440q80.jpg');
+is('★★ 尺寸档位 1440 在白名单内（400/1080/1200/1440 有效）',
+  /_1440x1440q\d+\.jpg$/.test(U.PIC_RESAMPLE_SUFFIX));
 
 console.log('\n结果：' + (fail ? '✗ 有失败：' + pass + ' 通过 / ' + fail + ' 失败'
   : '✓ 全部通过：' + pass + ' 项断言'));
