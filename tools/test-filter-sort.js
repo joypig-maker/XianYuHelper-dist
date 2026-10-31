@@ -201,11 +201,20 @@ section('7) ★★ 界面');
   is('★ 有「筛选并勾选」按钮', /'筛选并勾选'/.test(BR));
   is('★ 有「追加勾选」按钮', /'追加勾选'/.test(BR));
   is('★ 有「清空条件」按钮', /'清空条件'/.test(BR));
-  is('★★ 有「补想要数」按钮（只补缺想要人数的，快）',
+  // 2026-11-01：想要数列表接口直接给，按钮改成「有缺口才出现」，
+  // 平时不该摆在那儿误导人。主按钮让位给「补规格详情」。
+  is('★★ 有「补想要数」按钮',
     /'补想要数'/.test(BR) && /function fillMissingDetails/.test(BR) &&
     /fillMissingDetails\('heat'\)/.test(BR));
-  is('★★ 有「补全部」按钮（含规格表，慢但下载规格图需要）',
-    /'补全部'/.test(BR) && /fillMissingDetails\('all'\)/.test(BR));
+  is('★★「补想要数」平时隐藏、有缺口才出现',
+    /function refreshFillHeatBtn/.test(BR) &&
+    /xy-fill-heat/.test(BR) &&
+    /b\.style\.display = 'none'/.test(BR) &&
+    /refreshFillHeatBtn\(\);/.test(BR));
+  is('★★ 有「补规格详情」按钮（含规格表/规格图，下载规格图需要）',
+    /'补规格详情'/.test(BR) && /fillMissingDetails\('all'\)/.test(BR));
+  is('★ 补详情耗时估算区分直连站点与后台标签页站点',
+    /SITE\.detailPageOnly/.test(BR) && /Math\.max\(3,/.test(BR));
   is('★★ 补详情的两种范围分开：heat 只补缺热度的',
     /if \(heatOf\(d\) == null\) return true;/.test(BR) &&
     /if \(mode === 'all'\)/.test(BR));

@@ -68,6 +68,22 @@ const stat = () => `(function () {
   await page.waitForTimeout(8000);
   console.log('[首屏] ' + JSON.stringify(await page.evaluate(stat()), null, 1));
 
+  // 「补想要数」应当**平时隐藏**（列表接口直接给想要数）：
+  //   缺口 0 → display:none；有缺口 → 显示并带「（缺 N）」
+  const btnState = await page.evaluate(`(function () {
+    var out = { heat: null, all: null, btns: [] };
+    document.querySelectorAll('.xy-btn').forEach(function (b) {
+      out.btns.push(b.textContent + '|' + (b.style.display || 'shown'));
+    });
+    var h = document.querySelector('.xy-fill-heat');
+    out.heat = h ? { text: h.textContent, display: h.style.display || 'shown' } : 'NOT_FOUND';
+    document.querySelectorAll('.xy-btn').forEach(function (b) {
+      if (b.dataset.act === 'filter-fill-all') out.all = b.textContent;
+    });
+    return out;
+  })()`);
+  console.log('[按钮] ' + JSON.stringify(btnState, null, 1));
+
   // 滚动三屏，看商品池和想要人数是否持续跟上
   for (let i = 0; i < 3; i++) {
     await page.evaluate(`window.scrollTo(0, document.body.scrollHeight)`).catch(() => {});
