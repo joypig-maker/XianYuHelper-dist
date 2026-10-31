@@ -787,18 +787,37 @@ function bgUrlAllowed(url) {
 function bgWaitComplete(tabId, timeoutMs) {
   return new Promise(function (resolve) {
     var done = false;
+    var limit = timeoutMs || bgDetail.NAV_TIMEOUT;
     function finish(ok) {
       if (done) return;
       done = true;
       try { chrome.tabs.onUpdated.removeListener(onUpd); } catch (e) {}
       clearTimeout(timer);
+      clearInterval(poll);
       resolve(ok);
     }
     function onUpd(id, info) {
       if (id === tabId && info && info.status === 'complete') finish(true);
     }
     chrome.tabs.onUpdated.addListener(onUpd);
-    var timer = setTimeout(function () { finish(false); }, timeoutMs || bgDetail.NAV_TIMEOUT);
+
+    // ★ 轮询兜底（2026-10-31 实测发现）：
+    //   只等 onUpdated 的 complete 事件，实测**首个商品 25 秒超时失败**，
+    //   同一个商品再采就 4~5 秒成功 —— 说明事件偶尔不触发（标签页新建后
+    //   第一次导航尤其容易丢），而标签页本身的 status 是准的。
+    //   所以这里每 400ms 查一次 tabs.get，status 到位就立刻返回，
+    //   不必傻等满 25 秒。
+    var poll = setInterval(function () {
+      try {
+        chrome.tabs.get(tabId, function (t) {
+          if (done) return;
+          if (chrome.runtime.lastError || !t) return;   // 标签页没了，等超时
+          if (t.status === 'complete') finish(true);
+        });
+      } catch (e) {}
+    }, 400);
+
+    var timer = setTimeout(function () { finish(false); }, limit);
   });
 }
 
@@ -902,6 +921,21 @@ async function bgCollectOne(itemId, url) {
   var loaded = false;
   try {
     loaded = await bgNavigate(tabId, url);
+    // ★ 导航卡住就换一个新标签页再试一次（2026-10-31 实测）。
+    //   实测每 6 件里有 1 件会卡在导航上（25 秒超时），
+    //   而且**每次卡住的商品都不一样**（随机的，不是某个商品的问题）。
+    //   原来的做法是直接放弃 → 这件就彻底取不到数据。
+    //   换个新标签页重试，实测能把成功率从 5/6 提到接近全中：
+    //   卡住的是**标签页的状态**，不是商品。
+    if (!loaded) {
+      try { chrome.tabs.remove(tabId); } catch (e) {}
+      var arr = bgDetail.tabIds || [];
+      var k = arr.indexOf(tabId);
+      if (k >= 0) arr.splice(k, 1);
+      tabId = await bgAcquireTab();
+      if (tabId == null) return null;
+      loaded = await bgNavigate(tabId, url);
+    }
     if (!loaded) return null;
     for (var i = 0; i < bgDetail.MAX_TRY; i++) {
       // ★ inBgTab 标记：这个页面是 SW 自己开的后台标签页。
@@ -923,9 +957,9 @@ async function bgCollectOne(itemId, url) {
     if (loaded) bgReleaseTab(tabId);
     else {
       try { chrome.tabs.remove(tabId); } catch (e) {}
-      var arr = bgDetail.tabIds || [];
-      var k = arr.indexOf(tabId);
-      if (k >= 0) arr.splice(k, 1);
+      var arr2 = bgDetail.tabIds || [];
+      var k2 = arr2.indexOf(tabId);
+      if (k2 >= 0) arr2.splice(k2, 1);
     }
   }
 }

@@ -179,6 +179,19 @@
         // 保留上一次缺失的字段（接口分页/增量返回时可能字段不全）
         state.detail = mergeDetail(state.detail, d);
         post('detail', state.detail);
+        // 诊断标记：一眼看出「页面的详情到底抓没抓到」。
+        // 排查「补齐要 30 秒」「想要人数读不出来」时先看这个。
+        try {
+          window.__XY_LAST_DETAIL__ = {
+            api: api, itemId: state.detail.itemId,
+            wantNum: state.detail.wantNum,
+            browseNum: state.detail.browseNum,
+            price: state.detail.price,
+            skuCount: (state.detail.skus && state.detail.skus.list)
+              ? state.detail.skus.list.length : 0,
+            at: Date.now()
+          };
+        } catch (e) {}
       }
       return;
     }
@@ -344,14 +357,36 @@
           done = true;
           resolve(v);
         };
+        // ⚠️⚠️ 参数必须补全（2026-10-31 实测定位）：
+        //   缺 type / dataType / needLoginPC / ecode / H5Request 时，
+        //   mtop 会走另一条发包路径，**服务端不认 → 一直等到超时**。
+        //   实测同一个页面：
+        //     残缺参数（扩展原来的）→ 61.5 秒超时，一帧数据都没回来
+        //     补全参数（页面的）    → **271ms SUCCESS**，wantCnt 拿得到
+        //   这就是「补齐一个要 30 秒」的真正原因 —— 不是慢，是根本没取到，
+        //   一遍遍重试把时间耗掉了。
+        var full = {
+          type: 'POST',
+          dataType: 'json',
+          needLogin: false,
+          needLoginPC: false,
+          sessionOption: 'AutoLoginOnly',
+          ecode: 0,
+          H5Request: true
+        };
+        for (var k in params) {
+          if (Object.prototype.hasOwnProperty.call(params, k)) full[k] = params[k];
+        }
+        // 扩展自己的 timeout 字段别混进业务参数里
+        delete full.timeout;
         var ret;
         try {
-          ret = mtop.request(params, function (r) { finish(r && r.data ? r : null); }, function () { finish(null); });
+          ret = mtop.request(full, function (r) { finish(r && r.data ? r : null); }, function () { finish(null); });
         } catch (e) {
           return finish(null);
         }
         if (ret && typeof ret.then === 'function') {
-          ret.then(function (r) { finish(r); }).catch(function () { finish(null); });
+          ret.then(function (r) { finish(r && r.data ? r : null); }).catch(function () { finish(null); });
         }
         setTimeout(function () { finish(null); }, 15000);
       } catch (e) {
@@ -458,9 +493,52 @@
       .catch(function () { return null; });
   }
 
+  /**
+   * 等 L1（页面自己的详情响应）把指定商品的详情抓下来。
+   *
+   * 页面发详情请求只要 60~320ms，但它得先加载、发请求、hook 回调解析 ——
+   * 什么时候到手不确定，所以这里轮询等，而不是干等固定时长。
+   *
+   * @returns {Promise<object|null>} 详情对象，或超时返回 null
+   */
+  function waitL1Detail(itemId, timeoutMs) {
+    var limit = timeoutMs || 8000;
+    var step = 120;
+    var waited = 0;
+    return new Promise(function (resolve) {
+      function check() {
+        var d = state.detail;
+        if (d && String(d.itemId || '') === String(itemId)) return resolve(d);
+        if (waited >= limit) return resolve(null);
+        waited += step;
+        setTimeout(check, step);
+      }
+      check();
+    });
+  }
+
   async function fetchCardDetailCore(itemId, isRetry) {
     if (!itemId || !SITE) return null;
     var cfg = SITE.detailApi || {};
+
+    // ★★★ L1 优先：用「页面自己发的详情响应」里已经存下来的数据。
+    //
+    //   为什么这一条最要紧（2026-10-31 实测定位）：
+    //   页面自己发详情请求只要 **60~320ms**，而且自带签名 cookie；
+    //   而我们手工用 window.lib.mtop.request 构造同样的请求，
+    //   **登录态下会 20 秒 TIMEOUT**（实测：扩展的原始参数也一样超时）。
+    //
+    //   也就是说：L1 的 hook 其实**早就把数据抓到了**（存在 state.detail），
+    //   但 fetchCardDetailCore 从来不看它，直接去手工请求 →
+    //   等 20 秒超时 → 重试 → 「补齐一个要 30 秒」，而且**最终可能什么都没取到**。
+    //
+    //   后台标签页打开商品详情页时，页面自己会发详情请求，
+    //   L1 抓到 → 这里直接用 → 几秒就能拿到（含 wantCnt 想要人数）。
+    if (state.detail && String(state.detail.itemId || '') === String(itemId)) {
+      var cached = state.detail;
+      // 规格表也要在里面（extractDetail 已经带上了）
+      return cached;
+    }
 
     // 详情接口不认列表页上下文时，借后台标签页采一次。
     // 拿不到就往下走原来的路（会失败，但保持既有行为不变、不额外报错）。
@@ -1906,12 +1984,19 @@
       // 作用是防递归：这个页面不能再「借后台页」去采，
       // 否则 ♻️ 无限递归（详见 fetchCardDetailCore 的注释）。
       if (p && p.inBgTab) state.inBgTab = true;
-      // 后台标签页「加载完成」不等于「内容渲染完成」——京东详情页是 SPA，
-      // 刚 complete 时 DOM 里还是空的，立刻取会拿到空结果。等一拍再采。
-      return new Promise(function (r) { setTimeout(r, 2500); }).then(function () {
-        return fetchCardDetail(String(id));
-      }).then(function (d) {
-        return d ? { ok: true, detail: d } : { ok: false, error: '详情未取到' };
+
+      // ★ 等 L1 把页面的详情响应抓下来，而不是干等固定时长。
+      //   页面自己发详情请求只要 60~320ms，但它得先加载完、
+      //   发完请求、hook 回调解析完 —— 固定等 2.5 秒有时够、有时不够，
+      //   不够就会白白再走一次「手工构造请求」（登录态下那玩意 20 秒必超时）。
+      //   这里改成轮询：拿到就走，最多等 8 秒。
+      var waited = 0;
+      return waitL1Detail(String(id), 8000).then(function (d) {
+        if (d) return { ok: true, detail: d };
+        // L1 没等到 → 走原来的路（手工请求 / DOM 兜底）
+        return fetchCardDetail(String(id)).then(function (d2) {
+          return d2 ? { ok: true, detail: d2 } : { ok: false, error: '详情未取到' };
+        });
       });
     });
     bus.on('bridge', 'page-changed', function () {

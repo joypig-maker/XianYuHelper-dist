@@ -6,7 +6,7 @@ import urllib.parse
 
 import websocket
 
-CDP = "http://127.0.0.1:9222"
+CDP = "http://127.0.0.1:" + __import__("os").environ.get("XY_CDP_PORT", "9222")
 
 
 def http_list():
